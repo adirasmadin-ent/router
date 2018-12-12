@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+
+    <pl.droidsonroids.gif.GifTextView
+        android:id="@+id/gifTextView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/home" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:fontFamily="monospace"
+        android:gravity="center_horizontal"
+        android:text="Welcome"
+        android:textColor="#ddd"
+        android:textSize="24dp" />
+
+    <Button
+        android:id="@+id/click"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="8dp"
+        android:background="@drawable/btn_shape"
+        android:fontFamily="monospace"
+        android:text="Sign in "
+        android:textAllCaps="false"
+        android:textColor="#ddd"
+        android:textSize="16dp"
+        android:textStyle="bold" />
+
+
+</RelativeLayout>
