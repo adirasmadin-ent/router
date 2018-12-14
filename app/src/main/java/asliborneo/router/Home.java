@@ -1,18 +1,23 @@
 package asliborneo.router;
+
+
+import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -24,8 +29,10 @@ import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.common.internal.service.Common;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -39,7 +46,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -51,7 +57,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.gson.Gson;
-import com.google.maps.android.SphericalUtil;
 
 import asliborneo.router.Model.Notification;
 import asliborneo.router.Model.Token;
@@ -64,68 +69,91 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 
+public abstract class Home extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener,OnMapReadyCallback,
+        GoogleApiClient.ConnectionCallbacks,GoogleApiClient.OnConnectionFailedListener,
+        LocationListener, GoogleMap.OnMyLocationButtonClickListener,
+        GoogleMap.OnMyLocationClickListener, GoogleMap.OnMapClickListener,
+        ActivityCompat.OnRequestPermissionsResultCallback {
 
-public class Home extends AppCompatActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
-    Toolbar toolbar;
-    ActionBarDrawerToggle toggle;
-    DrawerLayout drawer_layout;
-    GoogleApiClient mgoogleApiclient;
-    LocationRequest locationRequest;
-    Location location;
+
+    SupportMapFragment mapFragment;
+
+    //Location
+    private GoogleMap mMap;
+
+    private static final int PLAY_SERVICE_RESOLUTION_REQUEST = 7002;
+    private static final int MY_PERMISSION_REQUEST_CODE = 7003;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+    private boolean mPermissionDenied = false;
+
+    PlaceAutocompleteFragment place_location,place_destination;
+
+    private LocationRequest mLocationRequest;
+    private GoogleApiClient mGoogleApiClient;
+
+
+
+    private static int UPDATE_INTERVAL = 5000;
+    private static int FASTEST_INTERVAL = 3000;
+    private static int DISPLACEMENT = 10;
+
+    DatabaseReference ref;
+    GeoFire geoFire;
+    Marker mUserMarker,destinationMarker,carMarker;
     LatLng pickup_location;
-    GoogleMap mMap;
-    Marker mcurrent;
-    String mlocation,mdestination;
-    Marker pick_up_location_marker,destination_location_marker;
-    ImageView expandable_image;
-    Button place_pickup_request;
-    NavigationView nav_view;
-    AutocompleteFilter typefilter;
-    int radius=1;
-    int distance=3;
-    PlaceAutocompleteFragment pick_up_place,destination_place;
-    private static final int LIMIT=3;
-    DatabaseReference Driver_available_ref;
+    String mLocation,mDestination;
+    ImageView imgExpandable;
+    bottom_sheet_rider_fragment bottomSheetRiderFragment;
+    Button btnPickupRequest;
+    boolean isDriverFound = false;
+    String driverId = "" ;
+    int radius = 1;
+    int distance = 1;
+    private static final int LIMIT = 3;
+    AutocompleteFilter typeFilter;
+    DatabaseReference driversAvailable;
+
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        SupportMapFragment MapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        MapFragment.getMapAsync(this);
-        drawer_layout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        toggle = new ActionBarDrawerToggle(
-                this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer_layout.addDrawerListener(toggle);
+
+
+
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
         toggle.syncState();
-        nav_view=(NavigationView) findViewById(R.id.nav_view);
-        nav_view.setNavigationItemSelectedListener(this);
-        place_pickup_request=(Button) findViewById(R.id.btnpickuprequest);
-        place_pickup_request.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!Commons.isDriveravailable) {
-                    request_pickup_here(FirebaseAuth.getInstance().getCurrentUser().getUid());
-                } else{
-                    sendmessagetodriver(Commons.driver_id);
-                }
+
+        // mGoogleApiClient = new GoogleApiClient.Builder(this)
+        //        .enableAutoManage(this, 0 /* clientId */, this)
+        //      .addApi(Places.GEO_DATA_API)
+        //    .build();
+
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        mapFragment=(SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
 
 
-            }
-        });
-        pick_up_place=(PlaceAutocompleteFragment)getFragmentManager().findFragmentById(R.id.location);
-        destination_place=(PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.destination);
-        pick_up_place.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+        imgExpandable = findViewById(R.id.imgexpandable);
+
+        place_location=(PlaceAutocompleteFragment)getFragmentManager().findFragmentById(R.id.location);
+        place_location.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
                 mMap.clear();
                 pickup_location=place.getLatLng();
 
-                location.setLatitude(place.getLatLng().latitude);
-                location.setLongitude(place.getLatLng().longitude);
-                mlocation  =place.getAddress().toString();
-                mcurrent= mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("PICKUP HERE").icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_marker)));
+                Commons.mLastLocation.setLatitude(place.getLatLng().latitude);
+                Commons.mLastLocation.setLongitude(place.getLatLng().longitude);
+                mLocation  =place.getAddress().toString();
+                mUserMarker= mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("PICKUP HERE").icon(BitmapDescriptorFactory.fromResource(R.drawable.pin)));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(),15.0f));
 
             }
@@ -135,15 +163,21 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
 
             }
         });
-        destination_place.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+
+        place_destination = (PlaceAutocompleteFragment)getFragmentManager().findFragmentById(R.id.destination);
+        place_destination.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
+                mMap.clear();
+                mDestination = place.getAddress().toString();
 
-                mdestination=place.getAddress().toString();
-                destination_location_marker=mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("Destination").icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_marker)));
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(),15.0f));
-                bottom_sheet_rider_fragment bsrf=bottom_sheet_rider_fragment.newinstance(mlocation,mdestination,false);
-                bsrf.show(getSupportFragmentManager(),bsrf.getTag());
+                destinationMarker=    mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.marker)).position(place.getLatLng()).title("PLACE DESTINATION"));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 15.0f));
+
+                bottom_sheet_rider_fragment bottomSheetRiderFragment=bottom_sheet_rider_fragment.newInstance(String.format("%f,%f",Commons.mLastLocation.getLatitude(),Commons.mLastLocation.getLongitude()),mDestination,false);
+                bottomSheetRiderFragment.show(getSupportFragmentManager(),bottomSheetRiderFragment.getTag());
+
+
             }
 
             @Override
@@ -151,15 +185,28 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
 
             }
         });
-        typefilter=new AutocompleteFilter.Builder()
+
+        typeFilter=new AutocompleteFilter.Builder()
                 .setTypeFilter(AutocompleteFilter.TYPE_FILTER_ADDRESS)
                 .setTypeFilter(3)
                 .build();
-        mgoogleApiclient = new GoogleApiClient.Builder(Home.this).addConnectionCallbacks(this).addOnConnectionFailedListener(this).addApi(LocationServices.API).build();
-        mgoogleApiclient.connect();
-        init_location_request();
 
+        btnPickupRequest = findViewById(R.id.btnpickuprequest);
+        btnPickupRequest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!isDriverFound)
+                    requestPickupHere(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                else
+                    sendRequestToDriver(driverId);
+            }
+
+
+        });
+        setUpLocation();
+        update_firebase_token();
     }
+
     private void update_firebase_token() {
         FirebaseDatabase db=FirebaseDatabase.getInstance();
         DatabaseReference tokens=db.getReference("Tokens");
@@ -167,15 +214,16 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
         tokens.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(token);
 
     }
-    private void sendmessagetodriver(String driver_id) {
+
+    private void sendRequestToDriver(String driverId) {
         DatabaseReference tokens=FirebaseDatabase.getInstance().getReference("Tokens");
-        tokens.orderByKey().equalTo(driver_id).addListenerForSingleValueEvent(new ValueEventListener() {
+        tokens.orderByKey().equalTo(driverId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for(DataSnapshot postsnapshot:dataSnapshot.getChildren()){
                     String Lat_lng;
                     Token token=postsnapshot.getValue(Token.class);
-                    Lat_lng=new Gson().toJson(new LatLng(location.getLatitude(),location.getLongitude()));
+                    Lat_lng=new Gson().toJson(new LatLng(Commons.mLastLocation.getLatitude(),Commons.mLastLocation.getLongitude()));
                     String rider_token= FirebaseInstanceId.getInstance().getToken();
                     Notification data=new Notification(rider_token,Lat_lng);
                     sender content=new sender(data,token.getToken());
@@ -193,7 +241,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
 
                         @Override
                         public void onFailure(Call<fcm_response> call, Throwable t) {
-                            Log.e("fcm_error",t.getMessage());;
+                            Log.e("fcm_error",t.getMessage());
                         }
                     });
                 }
@@ -206,38 +254,51 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
         });
     }
 
-    private void request_pickup_here(String uid) {
-        DatabaseReference pickupreference=FirebaseDatabase.getInstance().getReference("Pick Up Request");
-        GeoFire geoFire=new GeoFire(pickupreference);
-        geoFire.setLocation(uid, new GeoLocation(location.getLatitude(), location.getLongitude()), new GeoFire.CompletionListener() {
+    private void requestPickupHere(String uid) {
+        DatabaseReference dbRequest = FirebaseDatabase.getInstance().getReference(Commons.pickUpRequest_tbl);
+
+        GeoFire mGeoFire = new GeoFire(dbRequest);
+        mGeoFire.setLocation(uid, new GeoLocation(Commons.mLastLocation.getLatitude(), Commons.mLastLocation.getLongitude()), new GeoFire.CompletionListener() {
             @Override
             public void onComplete(String key, DatabaseError error) {
-                if(mcurrent.isVisible())
-                    mcurrent.remove();
-                mcurrent= mMap.addMarker(new MarkerOptions().title("Pick Up Here").position(new LatLng(location.getLatitude(),location.getLongitude())).snippet("").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
-                mcurrent.showInfoWindow();
-                find_driver();
-                place_pickup_request.setText("Getting Driver");
+                if (mUserMarker.isVisible())
+                    mUserMarker.remove();
 
+                mUserMarker = mMap.addMarker(new MarkerOptions()
+                        .title("Pickup Here")
+                        .snippet(" ")
+                        .position(new LatLng(Commons.mLastLocation.getLatitude(), Commons.mLastLocation.getLongitude()))
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+
+                mUserMarker.showInfoWindow();
+                findDriver();
+                btnPickupRequest.setText( "GETTING DRIVER ...");
             }
         });
 
     }
 
-    private void find_driver() {
-        DatabaseReference drivers_reference=FirebaseDatabase.getInstance().getReference("Drivers");
-        GeoFire gfdrivers=new GeoFire(drivers_reference);
-        final GeoQuery geoQuery=gfdrivers.queryAtLocation(new GeoLocation(location.getLatitude(),location.getLongitude()),radius);
+
+
+
+    private void findDriver() {
+        DatabaseReference drivers = FirebaseDatabase.getInstance().getReference(Commons.driver_location);
+        GeoFire gfDrivers = new GeoFire(drivers);
+        GeoQuery geoQuery =gfDrivers.queryAtLocation(new GeoLocation(Commons.mLastLocation.getLatitude(),Commons.mLastLocation.getLongitude()),
+                radius);
         geoQuery.removeAllListeners();
         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
             public void onKeyEntered(String key, GeoLocation location) {
-                if(!Commons.isDriveravailable){
-                    Commons.isDriveravailable=true;
-                    Commons.driver_id=key;
-                    place_pickup_request.setText("Call Driver");
+                if (!isDriverFound) {
+                    isDriverFound = true;
+                    driverId = key;
+                    btnPickupRequest.setText("CALL DRIVER");
+                    Toast.makeText(Home.this,""+key,Toast.LENGTH_SHORT).show();
+
                 }
             }
+
 
             @Override
             public void onKeyExited(String key) {
@@ -251,17 +312,11 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
 
             @Override
             public void onGeoQueryReady() {
-                if(!Commons.isDriveravailable&&radius<LIMIT){
+                if(!isDriverFound)
+                {
                     radius++;
-                    find_driver();
-                }else{
-                    if(!Commons.isDriveravailable) {
-                        Toast.makeText(Home.this, "No Drivers available around", Toast.LENGTH_LONG).show();
-                        place_pickup_request.setText("Request Pickup");
-                        geoQuery.removeAllListeners();
-                    }
+                    findDriver();
                 }
-
             }
 
             @Override
@@ -269,10 +324,197 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
 
             }
         });
+    }
+
+
+    private void startLocationUpdates() {
+        //int a = PackageManager.PERMISSION_DENIED;  //careful with logic here
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+    }
+
+
+    private void setUpLocation() {
+        if(  (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED   ) &&
+                ( ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED  ) )
+        {
+            //request runtime permission
+            ActivityCompat.requestPermissions(this, new String[]{
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+            }, MY_PERMISSION_REQUEST_CODE );
+        } else {
+            if(checkPlayServices()){
+
+                buildGoogleApiClient();
+                createLocationRequest();
+
+                displayLocation();
+            }
+        }
 
     }
+
+    private void displayLocation() {
+        if(  ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED    &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED   )
+        {
+            return;
+        }
+        Commons.mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        if(Commons.mLastLocation != null)
+        {
+
+            driversAvailable = FirebaseDatabase.getInstance().getReference(Commons.driver_location);
+            driversAvailable.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    loadAllAvailableDriver(new LatLng(Commons.mLastLocation.getLatitude(),Commons.mLastLocation.getLongitude()));
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
+            final double latitude = Commons.mLastLocation.getLatitude();
+            final double longitude = Commons.mLastLocation.getLongitude();
+
+            //update to firebase
+
+            //Add marker
+            if(mUserMarker != null) {
+                mUserMarker.remove();
+            }//remove already marker
+            mUserMarker = mMap.addMarker(new MarkerOptions()
+                    .position(new LatLng(latitude, longitude))
+                    .title("Your Location"));
+            //move cam to this position
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 15.0f));
+            //Draw animation rotate marker
+
+            loadAllAvailableDriver(new LatLng(Commons.mLastLocation.getLatitude(),Commons.mLastLocation.getLongitude()) );
+
+
+
+            Log.d("Welcome", String.format("Your location was changed: %f/%f",latitude,longitude));
+
+        } else {
+            Log.d("ERROR", "Cannot get your location");
+        }
+
+    }
+
+    private void loadAllAvailableDriver(final LatLng location) {
+
+        if(!isDriverFound)
+        {        mMap.clear();
+            mMap.addMarker(new MarkerOptions().position(location).title("You"));
+
+        }
+        else {
+
+
+
+
+            DatabaseReference driverLocation = FirebaseDatabase.getInstance().getReference(Commons.driver_location);
+            GeoFire gf = new GeoFire(driverLocation);
+            GeoQuery geoQuery = gf.queryAtLocation(new GeoLocation(location.latitude, location.longitude), distance);
+            geoQuery.removeAllListeners();
+
+            geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+                @Override
+                public void onKeyEntered(String key, final GeoLocation location) {
+                    FirebaseDatabase.getInstance().getReference(Commons.Registered_driver)
+                            .child(key)
+                            .addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    User rider = dataSnapshot.getValue(User.class);
+                                    if (rider != null)
+
+                                        mMap.addMarker(new MarkerOptions()
+                                                .position(new LatLng(location.latitude, location.longitude))
+                                                .flat(true)
+                                                .title(rider.getName())
+                                                .snippet("Phone: " + rider.getPhone())
+                                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.car)));
+
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                }
+                            });
+                }
+
+                @Override
+                public void onKeyExited(String key) {
+
+                }
+
+                @Override
+                public void onKeyMoved(String key, GeoLocation location) {
+
+                }
+
+                @Override
+                public void onGeoQueryReady() {
+                    if (distance <= LIMIT)
+                        distance++;
+                    loadAllAvailableDriver(location);
+                }
+
+                @Override
+                public void onGeoQueryError(DatabaseError error) {
+
+                }
+            });
+        }
+    }
+
+
+    private void createLocationRequest() {
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval( UPDATE_INTERVAL);
+        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest.setSmallestDisplacement(DISPLACEMENT);
+    }
+
+    private void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+        mGoogleApiClient.connect();
+    }
+
+    private boolean checkPlayServices() {
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        if(resultCode != ConnectionResult.SUCCESS){
+            if(GooglePlayServicesUtil.isUserRecoverableError(resultCode)){
+                GooglePlayServicesUtil.getErrorDialog(resultCode, this, PLAY_SERVICE_RESOLUTION_REQUEST).show();
+            }else{
+                Toast.makeText(this, "This device is not supported", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+            return false;
+        }
+        return true;
+    }
+
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        mMap =googleMap;
         mMap=googleMap;
         try {
             boolean issucess = mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(Home.this, R.raw.uber_style_map));
@@ -282,153 +524,144 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setZoomGesturesEnabled(true);
         mMap.setInfoWindowAdapter(new Custom_Info_Window(this));
+        mMap.setOnMyLocationButtonClickListener(this);
+        mMap.setOnMyLocationClickListener(this);
+        enableMyLocation();
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
 
-                if(destination_location_marker !=null)
-                    destination_location_marker.remove();
-                destination_location_marker=mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_marker)).title("Destination").position(latLng));
+                if(destinationMarker !=null)
+                    destinationMarker.remove();
+                destinationMarker=mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_marker)).title("Destination").position(latLng));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,15.0f));
-                bottom_sheet_rider_fragment bsrf=bottom_sheet_rider_fragment.newinstance(String.format("%f,%f",location.getLatitude(),location.getLongitude()),String.format("%f,%f",latLng.latitude,latLng.longitude),true);
+                bottom_sheet_rider_fragment bsrf=bottom_sheet_rider_fragment.newInstance(mLocation,String.format("%f,%f",latLng.latitude,latLng.longitude),true);
                 bsrf.show(getSupportFragmentManager(),bsrf.getTag());
             }
         });
-       googleMap.addMarker(new MarkerOptions().title("Rider Location").position(new LatLng(37.7750, -122.4183)));
-        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(37.7750, -122.4183), 15.0f));
+
     }
 
-    private void display_location() {
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+    private void enableMyLocation() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Permission to access the location is missing.
+            PermissionUtils.requestPermission(this, LOCATION_PERMISSION_REQUEST_CODE,
+                    Manifest.permission.ACCESS_FINE_LOCATION, true);
+        } else if (mMap != null) {
+            // Access to the location has been granted to the app.
+            mMap.setMyLocationEnabled(true);
+        }
+    }
+    @Override
+    public boolean onMyLocationButtonClick() {
+        Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show();
+        // Return false so that we don't consume the event and the default behavior still occurs
+        // (the camera animates to the user's current position).
+        return false;
+    }
+
+    @Override
+    public void onMyLocationClick(@NonNull Location location) {
+        Toast.makeText(this, "Current location:\n" + location, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        if (requestCode != LOCATION_PERMISSION_REQUEST_CODE) {
             return;
         }
-        location = LocationServices.FusedLocationApi.getLastLocation(mgoogleApiclient);
-        if(location!=null) {
-            LatLng center=new LatLng(location.getLatitude(),location.getLongitude());
-            LatLng northside= SphericalUtil.computeOffset(center,100000,0);
-            LatLng southside= SphericalUtil.computeOffset(center,100000,180);
-            LatLngBounds bounds=LatLngBounds.builder()
-                    .include(northside)
-                    .include(southside)
-                    .build();
-            pick_up_place.setBoundsBias(bounds);
-            pick_up_place.setFilter(typefilter);
-            destination_place.setBoundsBias(bounds);
-            pick_up_place.setFilter(typefilter);
-            Driver_available_ref=FirebaseDatabase.getInstance().getReference("Drivers");
-            Driver_available_ref.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    loadAvailabledriver(new LatLng(location.getLatitude(),location.getLongitude()));
-                }
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-
-            loadAvailabledriver(new LatLng(location.getLatitude(),location.getLongitude()));
+        if (PermissionUtils.isPermissionGranted(permissions, grantResults,
+                Manifest.permission.ACCESS_FINE_LOCATION)) {
+            // Enable the my location layer if the permission has been granted.
+            enableMyLocation();
+            buildGoogleApiClient();
+            createLocationRequest();
+            displayLocation();
+        } else {
+            // Display the missing permission error dialog when the fragments resume.
+            mPermissionDenied = true;
         }
     }
 
-    private void loadAvailabledriver(final LatLng mlocation) {
-        mMap.clear();
-        mcurrent = mMap.addMarker(new MarkerOptions().position(new LatLng(mlocation.latitude, mlocation.longitude)).title("You").icon(BitmapDescriptorFactory.fromResource(R.drawable.marker)));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mlocation.latitude, mlocation.longitude), 15.0f));
-        DatabaseReference driverlocation=FirebaseDatabase.getInstance().getReference("Drivers");
-        GeoFire gf=new GeoFire(driverlocation);
-        GeoQuery geoQuery=gf.queryAtLocation(new GeoLocation(mlocation.latitude,mlocation.longitude),distance);
-        geoQuery.removeAllListeners();
-        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
-            @Override
-            public void onKeyEntered(String key, final GeoLocation location) {
-                FirebaseDatabase.getInstance().getReference("DriverInformation").child(key).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        User user=dataSnapshot.getValue(User.class);
-                        mMap.addMarker(new MarkerOptions().position(new LatLng(mlocation.latitude,mlocation.longitude)).title(user.getName()).snippet("Phone "+user.getPhone()).icon(BitmapDescriptorFactory.fromResource(R.drawable.car)));
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
-            }
-
-            @Override
-            public void onKeyExited(String key) {
-
-            }
-
-            @Override
-            public void onKeyMoved(String key, GeoLocation location) {
-
-            }
-
-            @Override
-            public void onGeoQueryReady() {
-                if (distance<=LIMIT){
-                    distance++;
-                    loadAvailabledriver(mlocation);
-                }
-            }
-
-            @Override
-            public void onGeoQueryError(DatabaseError error) {
-
-            }
-        });
-    }
-
-
-    private void get_location_updates() {
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
+    @Override
+    protected void onResumeFragments() {
+        super.onResumeFragments();
+        if (mPermissionDenied) {
+            // Permission was not granted, display error dialog.
+            showMissingPermissionError();
+            mPermissionDenied = false;
         }
-        LocationServices.FusedLocationApi.requestLocationUpdates(mgoogleApiclient, locationRequest, this);
     }
 
-    private void init_location_request(){
-        locationRequest=new LocationRequest();
-        locationRequest.setInterval(5000);
-        locationRequest.setFastestInterval(3000);
-        locationRequest.setSmallestDisplacement(10);
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    /**
+     * Displays a dialog with error message explaining that the location permission is missing.
+     */
+    private void showMissingPermissionError() {
+        PermissionUtils.PermissionDeniedDialog
+                .newInstance(true).show(getSupportFragmentManager(), "dialog");
+    }
+
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        mGoogleApiClient.connect();
     }
     @Override
-    protected void onStart() {
-        super.onStart();
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+
+
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+
+    }
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        mgoogleApiclient.disconnect();
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.home, menu);
+        return true;
     }
 
     @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
         if(item.getItemId()==R.id.nav_signout){
             Sign_Out();
         }
         return false;
     }
+
 
     private void Sign_Out() {
         Paper.init(this);
@@ -440,25 +673,11 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
     }
 
     @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        display_location();
-        get_location_updates();
-        update_firebase_token();
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.e("location_connection",connectionResult.getErrorMessage());
-    }
-
-    @Override
     public void onLocationChanged(Location location) {
-        this.location=location;
-        display_location();
+        Commons.mLastLocation = location;
+        displayLocation();
     }
+
+
+
 }

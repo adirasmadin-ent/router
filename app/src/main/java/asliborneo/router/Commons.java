@@ -1,10 +1,13 @@
 package asliborneo.router;
 
+import android.location.Location;
+
 public class Commons {
+public static Location mLastLocation;
     public static final String driver_location="Drivers";
     public static final String Registered_driver="DriverInformation";
     public static final String Registered_Riders="RidersInformation";
-    public static final String Pickup_Request="PickUpRequest";
+    public static final String pickUpRequest_tbl="PickUpRequest";
     private static double Base_Fare=2.55;
     private static double Time_Rate=0.35;
     private static double Distance_Rate=1.75;
