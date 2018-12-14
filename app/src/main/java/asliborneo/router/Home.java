@@ -75,7 +75,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
     LatLng pickup_location;
     GoogleMap mMap;
     Marker mcurrent;
-    String pick_up_location,destination_location;
+    String mlocation,mdestination;
     Marker pick_up_location_marker,destination_location_marker;
     ImageView expandable_image;
     Button place_pickup_request;
@@ -114,18 +114,20 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
 
             }
         });
-        pick_up_place=(PlaceAutocompleteFragment)getFragmentManager().findFragmentById(R.id.placetxt);
+        pick_up_place=(PlaceAutocompleteFragment)getFragmentManager().findFragmentById(R.id.location);
         destination_place=(PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.destination);
         pick_up_place.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
                 mMap.clear();
                 pickup_location=place.getLatLng();
+
                 location.setLatitude(place.getLatLng().latitude);
                 location.setLongitude(place.getLatLng().longitude);
-                pick_up_location=place.getAddress().toString();
-                pick_up_location_marker=mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("Pick Up Here").icon(BitmapDescriptorFactory.fromResource(R.drawable.marker)));
+                mlocation  =place.getAddress().toString();
+                mcurrent= mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("PICKUP HERE").icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_marker)));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(),15.0f));
+
             }
 
             @Override
@@ -137,10 +139,10 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
             @Override
             public void onPlaceSelected(Place place) {
 
-                destination_location=place.getAddress().toString();
+                mdestination=place.getAddress().toString();
                 destination_location_marker=mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("Destination").icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_marker)));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(),15.0f));
-                bottom_sheet_rider_fragment bsrf=bottom_sheet_rider_fragment.newinstance(String.format("%f,%f",location.getLatitude(),location.getLongitude()),destination_location,false);
+                bottom_sheet_rider_fragment bsrf=bottom_sheet_rider_fragment.newinstance(mlocation,mdestination,false);
                 bsrf.show(getSupportFragmentManager(),bsrf.getTag());
             }
 
@@ -207,13 +209,19 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
     private void request_pickup_here(String uid) {
         DatabaseReference pickupreference=FirebaseDatabase.getInstance().getReference("Pick Up Request");
         GeoFire geoFire=new GeoFire(pickupreference);
-        geoFire.setLocation(uid,new GeoLocation(location.getLatitude(),location.getLongitude()));
-        if(mcurrent.isVisible())
-            mcurrent.remove();
-        mcurrent= mMap.addMarker(new MarkerOptions().title("Pick Up Here").position(new LatLng(location.getLatitude(),location.getLongitude())).snippet("").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
-        mcurrent.showInfoWindow();
-        place_pickup_request.setText("Getting Driver");
-        find_driver();
+        geoFire.setLocation(uid, new GeoLocation(location.getLatitude(), location.getLongitude()), new GeoFire.CompletionListener() {
+            @Override
+            public void onComplete(String key, DatabaseError error) {
+                if(mcurrent.isVisible())
+                    mcurrent.remove();
+                mcurrent= mMap.addMarker(new MarkerOptions().title("Pick Up Here").position(new LatLng(location.getLatitude(),location.getLongitude())).snippet("").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+                mcurrent.showInfoWindow();
+                find_driver();
+                place_pickup_request.setText("Getting Driver");
+
+            }
+        });
+
     }
 
     private void find_driver() {
@@ -286,8 +294,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
                 bsrf.show(getSupportFragmentManager(),bsrf.getTag());
             }
         });
-        //googleMap.addMarker(new MarkerOptions().title("Rider Location").position(new LatLng(37.7750, -122.4183)));
-        //googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(37.7750, -122.4183), 15.0f));
+       googleMap.addMarker(new MarkerOptions().title("Rider Location").position(new LatLng(37.7750, -122.4183)));
+        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(37.7750, -122.4183), 15.0f));
     }
 
     private void display_location() {
@@ -435,6 +443,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
     public void onConnected(@Nullable Bundle bundle) {
         display_location();
         get_location_updates();
+        update_firebase_token();
     }
 
     @Override

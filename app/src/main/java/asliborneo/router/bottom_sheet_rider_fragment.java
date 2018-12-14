@@ -55,7 +55,7 @@ public class bottom_sheet_rider_fragment extends BottomSheetDialogFragment {
 
     private void getPrice(String mlocation, String mdestination) {
         IGoogleAPI service=RetrofitClient.get_direction_client().create(IGoogleAPI.class);
-        Call<Directions> call=service.getPath("driving","less_driving",mlocation,mdestination,"AIzaSyDWnTae7WYgjfAEFgWav4xHsv8X__NFSRc");
+        Call<Directions> call=service.getPath("driving","less_driving",mlocation,mdestination,"AIzaSyBtssbTB-BQGwYZaCNgS9GScZLW13TQK-U");
         call.enqueue(new Callback<Directions>() {
             @Override
             public void onResponse(Call<Directions> call, Response<Directions> response) {
@@ -66,19 +66,20 @@ public class bottom_sheet_rider_fragment extends BottomSheetDialogFragment {
                             distance.setText(response.body().routes.get(0).legs.get(0).distance.text);
                             destination.setText(response.body().routes.get(0).legs.get(0).end_address);
                             location.setText(response.body().routes.get(0).legs.get(0).duration.text);
+
+                            String distance_text = response.body().routes.get(0).legs.get(0).distance.text;
+                            double distance_value = Double.parseDouble(distance_text.replaceAll("[^0-9\\\\.]+", ""));
+                            String time_text = response.body().routes.get(0).legs.get(0).duration.text;
+                            Integer time_value = Integer.parseInt(time_text.replaceAll("\\D+", ""));
+                            String final_calculate = String.format("%s + %s = $%.2f", distance_text, time_text, Commons.getPrice(distance_value, time_value));
+                            distance.setText(final_calculate);
+                            if (Tap_on_map) {
+                                String start_address = response.body().routes.get(0).legs.get(0).start_address;
+                                String end_address = response.body().routes.get(0).legs.get(0).end_address;
+                                location.setText(start_address);
+                                destination.setText(end_address);
+                            }
                         }
-                    String distance_text = response.body().routes.get(0).legs.get(0).distance.text;
-                    double distance_value = Double.parseDouble(distance_text.replaceAll("[^0-9\\\\.]+", ""));
-                    String time_text = response.body().routes.get(0).legs.get(0).duration.text;
-                    Integer time_value = Integer.parseInt(time_text.replaceAll("\\D+", ""));
-                    String final_calculate = String.format("%s + %s = $%.2f", distance_text, time_text, Commons.getPrice(distance_value, time_value));
-                    distance.setText(final_calculate);
-                    if(Tap_on_map){
-                        String start_address=response.body().routes.get(0).legs.get(0).start_address;
-                        String end_address=response.body().routes.get(0).legs.get(0).end_address;
-                        location.setText(start_address);
-                        destination.setText(end_address);
-                    }
                 }else{
                     Log.e("cost_response",response.toString());
                 }
