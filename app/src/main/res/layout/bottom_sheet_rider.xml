@@ -1,38 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="16dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@android:color/white"
+    android:background="@android:color/transparent"
     >
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="10dp"
+        android:padding="5dp"
         >
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:text="FARE RATES"
+            android:layout_marginBottom="10dp"
+            android:textColor="@android:color/white"
+            android:background="@android:color/holo_orange_light"
+            android:textStyle="bold|italic"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:weightSum="10"
             android:orientation="horizontal"
             >
-            <ImageView
-                android:src="@drawable/ic_location_on"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                />
             <TextView
-                android:id="@+id/location"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent" />
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:src="@drawable/pin" />
+
+            <TextView
+                android:layout_marginLeft="6dp"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="9"
-                android:text="Location"
+                android:layout_weight="3"
+                android:text="Location :"
+                android:textColor="@android:color/holo_green_light"
                 />
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:background="@android:color/holo_orange_light"/>
+
+            <TextView
+                android:id="@+id/txtLocation"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+
+                android:layout_weight="9" />
         </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="5dp"> </View>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -40,19 +70,36 @@
             android:orientation="horizontal"
             >
             <ImageView
-                android:src="@drawable/map"
+                android:src="@drawable/destinations"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 />
             <TextView
-                android:id="@+id/destination"
+                android:layout_marginLeft="6dp"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="9"
-                android:text="Destination"
+                android:layout_weight="3"
+                android:text="Destination :"
+                android:textColor="@android:color/holo_green_light"
                 />
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:background="@android:color/holo_orange_light"/>
+
+            <TextView
+                android:id="@+id/txtDestination"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+
+                android:layout_weight="9" />
         </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="5dp"> </View>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -60,19 +107,34 @@
             android:orientation="horizontal"
             >
             <ImageView
-                android:src="@drawable/rm"
+                android:src="@drawable/newrm"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 />
             <TextView
-                android:id="@+id/distance"
-                android:gravity="center_vertical"
+                android:layout_marginLeft="6dp"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="9"
+                android:layout_weight="3"
+                android:text="Total :"
+                android:textColor="@android:color/holo_green_light"
                 />
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:background="@android:color/holo_orange_light"/>
+
+            <TextView
+                android:id="@+id/txtTotal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+
+                android:layout_weight="9" />
         </LinearLayout>
 
     </LinearLayout>
+
+
+
 </LinearLayout>
