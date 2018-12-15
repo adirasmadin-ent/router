@@ -22,6 +22,8 @@ public class bottom_sheet_rider_fragment extends BottomSheetDialogFragment {
     String mLocation,mDestination;
     TextView txtLocation,txtDestination,txtdistance;
     static boolean Tap_on_map;
+    String final_calculate;
+
     public static bottom_sheet_rider_fragment newInstance(String location,String destination,boolean Tap_on_map) {
         Bundle args = new Bundle();
         bottom_sheet_rider_fragment bottomSheetRiderFragment = new bottom_sheet_rider_fragment();
@@ -66,18 +68,26 @@ public class bottom_sheet_rider_fragment extends BottomSheetDialogFragment {
         call.enqueue(new Callback<Directions>() {
             @Override
             public void onResponse(Call<Directions> call, Response<Directions> response) {
-                if(response.body()!=null) {
+                if(response.body()!=null)
+                    if( response.body().routes.size()>0)
+                        if(response.body().routes.get(0).legs.size()>0) {
                     String distance_text = response.body().routes.get(0).legs.get(0).distance.text;
                     double distance_value = Double.parseDouble(distance_text.replaceAll("[^0-9\\\\.]+", ""));
                     String time_text = response.body().routes.get(0).legs.get(0).duration.text;
                     Integer time_value = Integer.parseInt(time_text.replaceAll("\\D+", ""));
-                    String final_calculate = String.format("%s + %s = $%.2f", distance_text, time_text, Commons.getPrice(distance_value, time_value));
+
+                    if(final_calculate !=null)
+                   final_calculate= String.format(getString(R.string.final_calculate), distance_text, time_text, Commons.getPrice(distance_value, time_value));
                     txtdistance.setText(final_calculate);
+                    txtdistance.setText(String.format("%s km",Commons.getPrice(distance_value,time_value)));
 
                     String start_address=response.body().routes.get(0).legs.get(0).start_address;
                     String end_address=response.body().routes.get(0).legs.get(0).end_address;
+                  if (Tap_on_map)
                     txtLocation.setText(start_address);
                     txtDestination.setText(end_address);
+
+
 
                 }else{
                     Log.e("cost_response",response.toString());
