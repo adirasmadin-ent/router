@@ -8,22 +8,15 @@ import android.content.pm.PackageManager;
 
 
 import android.location.Location;
-import android.media.Image;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.firebase.geofire.GeoFire;
@@ -34,12 +27,10 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.common.internal.service.Common;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -66,8 +57,8 @@ import com.google.android.gms.location.LocationListener;
 
 
 import asliborneo.router.Model.Notification;
+import asliborneo.router.Model.Rider;
 import asliborneo.router.Model.Token;
-import asliborneo.router.Model.User;
 import asliborneo.router.Model.fcm_response;
 import asliborneo.router.Model.sender;
 import io.paperdb.Paper;
@@ -79,7 +70,6 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -118,7 +108,7 @@ public class Home extends AppCompatActivity
 
     Marker mUserMarker,destinationMarker;
 
-    String mLocation,mDestination;
+    String mPlaceLocation,mPlaceDestination;
     ImageView imgExpandable;
 
     Button btnPickupRequest;
@@ -164,11 +154,13 @@ public class Home extends AppCompatActivity
             @Override
             public void onPlaceSelected(Place place) {
                 mMap.clear();
-                mLocation  =place.getAddress().toString();
-                Commons.mLastLocation.setLatitude(place.getLatLng().latitude);
-                Commons.mLastLocation.setLongitude(place.getLatLng().longitude);
-                mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("PICKUP HERE").icon(BitmapDescriptorFactory.fromResource(R.drawable.pin)));
+
+
+
+                mUserMarker=  mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("PICKUP HERE").icon(BitmapDescriptorFactory.fromResource(R.drawable.pin)));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(),15.0f));
+
+                mPlaceLocation  =place.getAddress().toString();
 
 
             }
@@ -179,17 +171,31 @@ public class Home extends AppCompatActivity
             }
         });
 
+
+        btnPickupRequest = findViewById(R.id.btnpickuprequest);
+        btnPickupRequest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!isDriverFound)
+                    requestPickupHere(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                else
+                    sendRequestToDriver(driverId);
+            }
+
+
+        });
+
         place_destination = (PlaceAutocompleteFragment)getFragmentManager().findFragmentById(R.id.destination);
         place_destination.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
 
-                mDestination = place.getAddress().toString();
+                mPlaceDestination = place.getAddress().toString();
 
                 mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.marker)).position(place.getLatLng()).title("PLACE DESTINATION"));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 15.0f));
 
-                bottom_sheet_rider_fragment bottomSheetRiderFragment=bottom_sheet_rider_fragment.newInstance(mLocation,mDestination,false);
+                bottom_sheet_rider_fragment bottomSheetRiderFragment=bottom_sheet_rider_fragment.newInstance(mPlaceLocation,mPlaceDestination);
                 bottomSheetRiderFragment.show(getSupportFragmentManager(),bottomSheetRiderFragment.getTag());
 
             }
@@ -204,19 +210,6 @@ public class Home extends AppCompatActivity
                 .setTypeFilter(AutocompleteFilter.TYPE_FILTER_ADDRESS)
                 .setTypeFilter(3)
                 .build();
-
-        btnPickupRequest = findViewById(R.id.btnpickuprequest);
-        btnPickupRequest.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!isDriverFound)
-                    requestPickupHere(FirebaseAuth.getInstance().getCurrentUser().getUid());
-                else
-                    sendRequestToDriver(driverId);
-            }
-
-
-        });
 
         update_firebase_token();
 
@@ -450,14 +443,14 @@ public class Home extends AppCompatActivity
                         .addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                User user = dataSnapshot.getValue(User.class);
-                                if(user !=null)
+                                Rider rider = dataSnapshot.getValue(Rider.class);
+
 
                                     mMap.addMarker(new MarkerOptions()
                                             .position(new LatLng(location.latitude,location.longitude))
                                             .flat(true)
-                                            .title(user.getName())
-                                            .snippet("Phone: "+user.getPhone())
+                                            .title(rider.getName())
+                                            .snippet("Phone: "+rider.getPhone())
                                             .icon(BitmapDescriptorFactory.fromResource(R.drawable.car)));
 
                             }
@@ -483,6 +476,7 @@ public class Home extends AppCompatActivity
             public void onGeoQueryReady() {
                 if(distance <=LIMIT)
                     distance++;
+                loadAllAvailableDriver(location);
 
             }
 
@@ -543,10 +537,10 @@ public class Home extends AppCompatActivity
                     destinationMarker.remove();
                 }
 
-                if(mLocation != null && mDestination !=null)
+                if(mPlaceLocation != null && mPlaceDestination !=null)
                 destinationMarker=mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_marker)).title("Destination").position(latLng));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,15.0f));
-                bottom_sheet_rider_fragment bottomSheetRiderFragment = bottom_sheet_rider_fragment.newInstance(String.format("%f,%f", Commons.mLastLocation.getLatitude(), Commons.mLastLocation.getLongitude()),String.format("%f,%f", latLng.latitude, latLng.longitude) ,true);
+                bottom_sheet_rider_fragment bottomSheetRiderFragment = bottom_sheet_rider_fragment.newInstance(String.format("%f,%f", Commons.mLastLocation.getLatitude(), Commons.mLastLocation.getLongitude()),String.format("%f,%f", latLng.latitude, latLng.longitude));
                 bottomSheetRiderFragment.show(getSupportFragmentManager(),bottomSheetRiderFragment.getTag());
             }
         });

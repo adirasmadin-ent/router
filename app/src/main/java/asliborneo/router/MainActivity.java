@@ -5,12 +5,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,12 +28,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
+import asliborneo.router.Model.Rider;
 import dmax.dialog.SpotsDialog;
 import io.paperdb.Paper;
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
-
-import asliborneo.router.Model.User;
 
 public class MainActivity extends AppCompatActivity {
     Button btnSignin,btnRegister;
@@ -141,12 +138,12 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if(task.isSuccessful()){
-                                User user=new User();
-                                user.setName(name.getText().toString());
-                                user.setPassword(password.getText().toString());
-                                user.setPhone(phone.getText().toString());
-                                user.setEmail(email.getText().toString());
-                                Rider.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(user).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                asliborneo.router.Model.Rider rider=new Rider();
+                                rider.setName(name.getText().toString());
+                                rider.setPassword(password.getText().toString());
+                                rider.setPhone(phone.getText().toString());
+                                rider.setEmail(email.getText().toString());
+                                Rider.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(rider).addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void aVoid) {
                                         Toast.makeText(MainActivity.this,"Registration Sucess",Toast.LENGTH_LONG).show();

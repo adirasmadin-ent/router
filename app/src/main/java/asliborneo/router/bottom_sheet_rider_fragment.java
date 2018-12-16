@@ -24,12 +24,12 @@ public class bottom_sheet_rider_fragment extends BottomSheetDialogFragment {
     static boolean Tap_on_map;
     String final_calculate;
 
-    public static bottom_sheet_rider_fragment newInstance(String location,String destination,boolean Tap_on_map) {
+    public static bottom_sheet_rider_fragment newInstance(String location,String destination) {
         Bundle args = new Bundle();
         bottom_sheet_rider_fragment bottomSheetRiderFragment = new bottom_sheet_rider_fragment();
         args.putString("location", location);
         args.putString("destination", destination);
-        args.putBoolean("Tap_on_map",Tap_on_map);
+
         bottomSheetRiderFragment.setArguments(args);
         return bottomSheetRiderFragment;
     }
@@ -39,7 +39,7 @@ public class bottom_sheet_rider_fragment extends BottomSheetDialogFragment {
         super.onCreate(savedInstanceState);
         mLocation = getArguments().getString("location");
         mDestination = getArguments().getString("destination");
-        Tap_on_map=getArguments().getBoolean("Tap_on_map");
+
 
 
     }
@@ -64,7 +64,7 @@ public class bottom_sheet_rider_fragment extends BottomSheetDialogFragment {
     }
     private void getPrice(String mLocation, String mDestination) {
         IGoogleAPI service=RetrofitClient.get_direction_client().create(IGoogleAPI.class);
-        Call<Directions> call=service.getPath("driving","less_driving",mLocation,mDestination,"AIzaSyBtssbTB-BQGwYZaCNgS9GScZLW13TQK-U");
+        Call<Directions> call=service.getPath("driving","less_driving",mLocation,mDestination,"AIzaSyDWnTae7WYgjfAEFgWav4xHsv8X__NFSRc");
         call.enqueue(new Callback<Directions>() {
             @Override
             public void onResponse(Call<Directions> call, Response<Directions> response) {
