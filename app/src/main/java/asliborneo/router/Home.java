@@ -43,6 +43,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -51,6 +52,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 
+import com.google.firebase.iid.InstanceIdResult;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 
 import com.google.android.gms.location.LocationListener;
@@ -119,6 +122,7 @@ public class Home extends AppCompatActivity
     private static final int LIMIT = 3;
     AutocompleteFilter typeFilter;
     DatabaseReference driversAvailable;
+    private  final String TAG = "Home";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,7 +150,7 @@ public class Home extends AppCompatActivity
         mapFragment=(SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-
+        FirebaseMessaging.getInstance().setAutoInitEnabled(true);
         imgExpandable = findViewById(R.id.imgexpandable);
 
         place_location=(PlaceAutocompleteFragment)getFragmentManager().findFragmentById(R.id.location);
@@ -176,6 +180,10 @@ public class Home extends AppCompatActivity
         btnPickupRequest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+
+
+
                 if (!isDriverFound)
                     requestPickupHere(FirebaseAuth.getInstance().getCurrentUser().getUid());
                 else
@@ -184,6 +192,7 @@ public class Home extends AppCompatActivity
 
 
         });
+
 
         place_destination = (PlaceAutocompleteFragment)getFragmentManager().findFragmentById(R.id.destination);
         place_destination.setOnPlaceSelectedListener(new PlaceSelectionListener() {
@@ -213,8 +222,7 @@ public class Home extends AppCompatActivity
 
         update_firebase_token();
 
-        buildGoogleApiClient();
-        createLocationRequest();
+      setUpLocation();
     }
 
     private void update_firebase_token() {
@@ -224,6 +232,7 @@ public class Home extends AppCompatActivity
         tokens.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(token);
 
     }
+
 
     private void sendRequestToDriver(String driverId) {
         DatabaseReference tokens=FirebaseDatabase.getInstance().getReference("Tokens");
@@ -304,7 +313,7 @@ public class Home extends AppCompatActivity
                     isDriverFound = true;
                     driverId = key;
                     btnPickupRequest.setText("CALL DRIVER");
-                    Toast.makeText(Home.this,""+key,Toast.LENGTH_SHORT).show();
+                   // Toast.makeText(Home.this,""+key,Toast.LENGTH_SHORT).show();
 
                 }
             }
@@ -322,12 +331,13 @@ public class Home extends AppCompatActivity
 
             @Override
             public void onGeoQueryReady() {
-                if(!isDriverFound)
+                if(!isDriverFound && radius < LIMIT)
                 {
                     radius++;
                     findDriver();
-                    loadAllAvailableDriver(new LatLng(Commons.mLastLocation.getLatitude(),Commons.mLastLocation.getLongitude()));
+
                 }
+
             }
 
             @Override
@@ -361,7 +371,9 @@ public class Home extends AppCompatActivity
         } else {
             if(checkPlayServices()){
 
-
+                enableMyLocation();
+                buildGoogleApiClient();
+                createLocationRequest();
                 displayLocation();
 
 
@@ -538,7 +550,7 @@ public class Home extends AppCompatActivity
                 }
 
                 if(mPlaceLocation != null && mPlaceDestination !=null)
-                destinationMarker=mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_marker)).title("Destination").position(latLng));
+                destinationMarker=mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.pin)).title("Destination").position(latLng));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,15.0f));
                 bottom_sheet_rider_fragment bottomSheetRiderFragment = bottom_sheet_rider_fragment.newInstance(String.format("%f,%f", Commons.mLastLocation.getLatitude(), Commons.mLastLocation.getLongitude()),String.format("%f,%f", latLng.latitude, latLng.longitude));
                 bottomSheetRiderFragment.show(getSupportFragmentManager(),bottomSheetRiderFragment.getTag());
@@ -582,10 +594,8 @@ public class Home extends AppCompatActivity
         if (PermissionUtils.isPermissionGranted(permissions, grantResults,
                 Manifest.permission.ACCESS_FINE_LOCATION)) {
             // Enable the my location layer if the permission has been granted.
-            enableMyLocation();
-            buildGoogleApiClient();
-            createLocationRequest();
-            displayLocation();
+
+
         } else {
             // Display the missing permission error dialog when the fragments resume.
             mPermissionDenied = true;
