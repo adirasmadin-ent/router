@@ -15,4 +15,6 @@
     <string name="permission_required_toast">require toast</string>
     <string name="permission_rationale_location">rationale location</string>
     <string name="final_calculate">%s + %s = $%.2f</string>
+    <string name="default_notification_channel_id">1</string>
+    <string name="default_notification_channel_name">route.r</string>
 </resources>

@@ -126,7 +126,7 @@
                 android:background="@android:color/holo_orange_light"/>
 
             <TextView
-                android:id="@+id/txtdistance"
+                android:id="@+id/distance"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
 

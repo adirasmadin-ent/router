@@ -5,23 +5,23 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
     private static Retrofit retrofit=null;
-    private static Retrofit fcm_retrofit=null;
+    private static Retrofit retrofit_obj_for_Directions_api=null;
     public static Retrofit getClient(){
-        if (fcm_retrofit==null){
-            fcm_retrofit=new Retrofit.Builder()
+        if (retrofit==null){
+            retrofit=new Retrofit.Builder()
                     .baseUrl("https://fcm.googleapis.com/")
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
         }
-        return fcm_retrofit;
+        return retrofit;
     }
-    public static Retrofit get_direction_client(){
-        if (retrofit==null){
-            retrofit=new Retrofit.Builder()
-                    .addConverterFactory(GsonConverterFactory.create())
+    public static Retrofit getDirectionClient(){
+        if (retrofit_obj_for_Directions_api==null){
+            retrofit_obj_for_Directions_api=new Retrofit.Builder()
                     .baseUrl("https://maps.googleapis.com/")
+                    .addConverterFactory(GsonConverterFactory.create())
                     .build();
         }
-        return retrofit;
+        return retrofit_obj_for_Directions_api;
     }
 }
