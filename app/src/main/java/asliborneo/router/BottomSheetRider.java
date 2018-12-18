@@ -22,7 +22,7 @@ import retrofit2.Response;
 
 public class BottomSheetRider extends BottomSheetDialogFragment {
     String mLocation,mDestination;
-    TextView location, destination,txtDistance;
+    TextView txtLocation, txtDestination,txtDistance;
     static boolean Tap_on_map;
     IGoogleMAPApi mService;
     public static  BottomSheetRider newInstance(String location,String destination,boolean Tap_on_map){
@@ -49,13 +49,13 @@ public class BottomSheetRider extends BottomSheetDialogFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v=inflater.inflate(R.layout.bottom_sheet_rider,container,false);
-        location = (TextView) v.findViewById(R.id.location);
-        destination = (TextView) v.findViewById(R.id.destination);
+        txtLocation = (TextView) v.findViewById(R.id.location);
+        txtDestination = (TextView) v.findViewById(R.id.destination);
         txtDistance=(TextView) v.findViewById(R.id.distance);
         getPrice(mLocation,mDestination);
         if (!Tap_on_map) {
-            location.setText(mLocation);
-            destination.setText(mDestination);
+            txtLocation.setText(mLocation);
+            txtDestination.setText(mDestination);
         }
         return v;
     }
@@ -96,6 +96,16 @@ public class BottomSheetRider extends BottomSheetDialogFragment {
                                 Commons.getPrice(distance_value, time_value));
 
                         txtDistance.setText(final_calculate);
+
+                        if(Tap_on_map)
+                        {
+                            String start_address = legsObject.getString(("start_address"));
+                            String end_address = legsObject.getString("end_address");
+                            txtLocation.setText(start_address);
+                            txtDestination.setText(end_address);
+                        }
+
+
 
                     } catch (JSONException e) {
                         e.printStackTrace();

@@ -75,7 +75,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
     LatLng pickup_location;
     GoogleMap mMap;
     Marker mcurrent;
-    String mLocation,mDestination;
+    String mPlaceLocation,mPlaceDestination;
     Marker pick_up_location_marker,destination_location_marker;
     IFCMService mFCMService;
     Button place_pickup_request;
@@ -125,7 +125,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
             @Override
             public void onPlaceSelected(Place place) {
                 mMap.clear();
-                mLocation = place.getAddress().toString();
+                mPlaceLocation = place.getAddress().toString();
                 pick_up_location_marker = mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("Pick Up Here").icon(BitmapDescriptorFactory.fromResource(R.drawable.marker)));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 15.0f));
             }
@@ -139,11 +139,12 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
             @Override
             public void onPlaceSelected(Place place) {
 
-                mDestination=place.getAddress().toString();
+                mPlaceDestination=place.getAddress().toString();
                 destination_location_marker=mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("Destination").icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_marker)));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(),15.0f));
-                BottomSheetRider bottomSheetRider=BottomSheetRider.newInstance(String.format("%f,%f", location.getLatitude(), location.getLongitude()), String.format("%f,%f", pickup_location.latitude, pickup_location.longitude),false);
+                BottomSheetRider bottomSheetRider=BottomSheetRider.newInstance(mPlaceLocation,mPlaceDestination,false);
                 bottomSheetRider.show(getSupportFragmentManager(),bottomSheetRider.getTag());
+
             }
 
             @Override

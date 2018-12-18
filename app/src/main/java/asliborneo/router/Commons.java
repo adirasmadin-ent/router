@@ -11,7 +11,7 @@ public static Location mLastLocation;
     public static final String pickUpRequest_tbl="PickUpRequest";
     private static double Base_Fare=2.55;
     private static double Time_Rate=0.35;
-    private static double Distance_Rate=0.50;
+    private static double Distance_Rate=1;
     public  static  Boolean isDriverFound=false;
     public static String  driver_id="";
     public static final String googleAPIUrl ="https://maps.googleapis.com";
