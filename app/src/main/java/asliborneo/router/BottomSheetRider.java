@@ -1,6 +1,6 @@
 package asliborneo.router;
 
-
+import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialogFragment;
@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,46 +20,42 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 
-
-
 public class BottomSheetRider extends BottomSheetDialogFragment {
-    String mLocation, mDestination;
-    TextView txtLocation, txtDestination, txtDistance;
-
-    IGoogleMAPApi mService;
+    String mLocation,mDestination;
+    TextView location, destination,txtDistance;
     static boolean Tap_on_map;
-
-    public static BottomSheetRider newinstance(String location, String destination) {
-        BottomSheetRider f = new BottomSheetRider();
-        Bundle args = new Bundle();
-        args.putString("location", location);
-        args.putString("destination", destination);
-
-        f.setArguments(args);
-        return f;
+    IGoogleMAPApi mService;
+    public static  BottomSheetRider newInstance(String location,String destination,boolean Tap_on_map){
+        BottomSheetRider bottomSheetRider=new BottomSheetRider();
+        Bundle args=new Bundle();
+        args.putString("location",location);
+        args.putString("destination",destination);
+        args.putBoolean("Tap_on_map",Tap_on_map);
+        bottomSheetRider.setArguments(args);
+        return bottomSheetRider;
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mService = Commons.getGoogleService();
+
         mLocation = getArguments().getString("location");
         mDestination = getArguments().getString("destination");
 
+        Tap_on_map=getArguments().getBoolean("Tap_on_map");
     }
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.bottom_sheet_rider, container, false);
-        TextView txtLocation = (TextView) v.findViewById(R.id.location);
-        TextView txtDestination = (TextView) v.findViewById(R.id.destination);
-                 txtDistance = (TextView) v.findViewById(R.id.distance);
-
-        mService = Commons.getGoogleService();
-        getPrice(mLocation, mDestination);
+        View v=inflater.inflate(R.layout.bottom_sheet_rider,container,false);
+        location = (TextView) v.findViewById(R.id.location);
+        destination = (TextView) v.findViewById(R.id.destination);
+        txtDistance=(TextView) v.findViewById(R.id.distance);
+        getPrice(mLocation,mDestination);
         if (!Tap_on_map) {
-            txtLocation.setText(mLocation);
-            txtDestination.setText(mDestination);
+            location.setText(mLocation);
+            destination.setText(mDestination);
         }
         return v;
     }
@@ -117,6 +114,7 @@ public class BottomSheetRider extends BottomSheetDialogFragment {
 
     }
 }
+
 
 
 

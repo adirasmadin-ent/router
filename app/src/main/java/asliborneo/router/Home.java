@@ -1,13 +1,9 @@
 package asliborneo.router;
 
-
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.location.Location;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -68,8 +64,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static asliborneo.router.Commons.fcmURL;
-
 
 public class Home extends AppCompatActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
     Toolbar toolbar;
@@ -81,20 +75,17 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
     LatLng pickup_location;
     GoogleMap mMap;
     Marker mcurrent;
-    String mLocation, mDestination;
-    Marker pick_up_location_marker, destination_location_marker;
-    ImageView imgExpandable;
+    String mLocation,mDestination;
+    Marker pick_up_location_marker,destination_location_marker;
+    IFCMService mFCMService;
     Button place_pickup_request;
     NavigationView nav_view;
     AutocompleteFilter typefilter;
-    int radius = 1;
-    int distance = 3;
-    PlaceAutocompleteFragment place_location, place_destination;
-    private static final int LIMIT = 3;
+    int radius=1;
+    int distance=3;
+    PlaceAutocompleteFragment place_location,place_destination;
+    private static final int LIMIT=3;
     DatabaseReference Driver_available_ref;
-    private static final String TAG = "Home";
-    IFCMService mFCMService;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -102,28 +93,32 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         SupportMapFragment MapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        assert MapFragment != null;
         MapFragment.getMapAsync(this);
         drawer_layout = (DrawerLayout) findViewById(R.id.drawer_layout);
         toggle = new ActionBarDrawerToggle(
                 this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer_layout.addDrawerListener(toggle);
         toggle.syncState();
-        nav_view = (NavigationView) findViewById(R.id.nav_view);
+        nav_view=(NavigationView) findViewById(R.id.nav_view);
         nav_view.setNavigationItemSelectedListener(this);
-        place_pickup_request = (Button) findViewById(R.id.btnpickuprequest);
+
+        mFCMService = Commons.getFCMService();
+
+        place_pickup_request=(Button) findViewById(R.id.btnpickuprequest);
         place_pickup_request.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (!Commons.isDriverFound) {
                     request_pickup_here(FirebaseAuth.getInstance().getCurrentUser().getUid());
-                } else {
+                } else{
                     sendmessagetodriver(Commons.driver_id);
                 }
 
 
             }
         });
-        imgExpandable = findViewById(R.id.imgexpandable);
+
         place_location = (PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.location);
         place_destination = (PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.destination);
         place_location.setOnPlaceSelectedListener(new PlaceSelectionListener() {
@@ -144,11 +139,11 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
             @Override
             public void onPlaceSelected(Place place) {
 
-                mDestination = place.getAddress().toString();
-                destination_location_marker = mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("Destination").icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_marker)));
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 15.0f));
-                BottomSheetRider f = BottomSheetRider.newinstance(mLocation, mDestination);
-
+                mDestination=place.getAddress().toString();
+                destination_location_marker=mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("Destination").icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_marker)));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(),15.0f));
+                BottomSheetRider bottomSheetRider=BottomSheetRider.newInstance(String.format("%f,%f", location.getLatitude(), location.getLongitude()), String.format("%f,%f", pickup_location.latitude, pickup_location.longitude),false);
+                bottomSheetRider.show(getSupportFragmentManager(),bottomSheetRider.getTag());
             }
 
             @Override
@@ -156,25 +151,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
 
             }
         });
-
-        mFCMService = Commons.getFCMService();
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // Create channel to show notifications.
-            String channelId  = getString(R.string.default_notification_channel_id);
-            String channelName = getString(R.string.default_notification_channel_name);
-            NotificationManager notificationManager =
-                    getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(new NotificationChannel(channelId,
-                    channelName, NotificationManager.IMPORTANCE_LOW));
-        }
-        if (getIntent().getExtras() != null) {
-            for (String key : getIntent().getExtras().keySet()) {
-                Object value = getIntent().getExtras().get(key);
-                Log.d(TAG, "Key: " + key + " Value: " + value);
-            }
-        }
-        typefilter = new AutocompleteFilter.Builder()
+        typefilter=new AutocompleteFilter.Builder()
                 .setTypeFilter(AutocompleteFilter.TYPE_FILTER_ADDRESS)
                 .setTypeFilter(3)
                 .build();
@@ -184,43 +161,39 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
         update_firebase_token();
 
     }
-
     private void update_firebase_token() {
-        FirebaseDatabase db = FirebaseDatabase.getInstance();
-        DatabaseReference tokens = db.getReference("Tokens");
-        Token token = new Token(FirebaseInstanceId.getInstance().getToken());
+        FirebaseDatabase db=FirebaseDatabase.getInstance();
+        DatabaseReference tokens=db.getReference("Tokens");
+        Token token=new Token(FirebaseInstanceId.getInstance().getToken());
         tokens.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(token);
 
     }
-
     private void sendmessagetodriver(String driver_id) {
-        DatabaseReference tokens = FirebaseDatabase.getInstance().getReference("Tokens");
+        DatabaseReference tokens=FirebaseDatabase.getInstance().getReference("Tokens");
         tokens.orderByKey().equalTo(driver_id).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot postsnapshot : dataSnapshot.getChildren()) {
+                for(DataSnapshot postsnapshot:dataSnapshot.getChildren()){
                     String Lat_lng;
-                    Token token = postsnapshot.getValue(Token.class);
-                    Lat_lng = new Gson().toJson(new LatLng(location.getLatitude(), location.getLongitude()));
-                    String rider_token = FirebaseInstanceId.getInstance().getToken();
-                    Notification data = new Notification(rider_token, Lat_lng);
-                    sender content = new sender(data, token.getToken());
-                    IFCMService mFCMService = FCMClient.getClient(fcmURL).create(IFCMService.class);
-                    Call<fcm_response> call = mFCMService.send_message(content);
+                    Token token=postsnapshot.getValue(Token.class);
+                    Lat_lng=new Gson().toJson(new LatLng(location.getLatitude(),location.getLongitude()));
+                    String rider_token= FirebaseInstanceId.getInstance().getToken();
+                    Notification data=new Notification(rider_token,Lat_lng);
+                    sender content=new sender(data,token.getToken());
+                    Call<fcm_response> call=mFCMService.send_message(content);
                     call.enqueue(new Callback<fcm_response>() {
                         @Override
                         public void onResponse(Call<fcm_response> call, Response<fcm_response> response) {
-                            if (response.body().success == 1) {
-                                Toast.makeText(Home.this, "Request Sent", Toast.LENGTH_LONG).show();
-                            } else {
-                                Toast.makeText(Home.this, "Failed!", Toast.LENGTH_LONG).show();
+                            if(response.body().success==1){
+                                Toast.makeText(Home.this,"Request Sent",Toast.LENGTH_LONG).show();
+                            }else {
+                                Toast.makeText(Home.this,"Failed!",Toast.LENGTH_LONG).show();
                             }
                         }
 
                         @Override
                         public void onFailure(Call<fcm_response> call, Throwable t) {
-                            Log.e("fcm_error", t.getMessage());
-                            ;
+                            Log.e("fcm_error",t.getMessage());;
                         }
                     });
                 }
@@ -234,14 +207,14 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
     }
 
     private void request_pickup_here(String uid) {
-        DatabaseReference pickupreference = FirebaseDatabase.getInstance().getReference("Pick Up Request");
-        GeoFire geoFire = new GeoFire(pickupreference);
+        DatabaseReference pickupreference=FirebaseDatabase.getInstance().getReference("Pick Up Request");
+        GeoFire geoFire=new GeoFire(pickupreference);
         geoFire.setLocation(uid, new GeoLocation(location.getLatitude(), location.getLongitude()), new GeoFire.CompletionListener() {
             @Override
             public void onComplete(String key, DatabaseError error) {
-                if (mcurrent.isVisible())
+                if(mcurrent.isVisible())
                     mcurrent.remove();
-                mcurrent = mMap.addMarker(new MarkerOptions().title("Pick Up Here").position(new LatLng(location.getLatitude(), location.getLongitude())).snippet("").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+                mcurrent= mMap.addMarker(new MarkerOptions().title("Pick Up Here").position(new LatLng(location.getLatitude(),location.getLongitude())).snippet("").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
                 mcurrent.showInfoWindow();
                 place_pickup_request.setText("Getting Driver");
                 find_driver();
@@ -251,16 +224,16 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
     }
 
     private void find_driver() {
-        DatabaseReference drivers_reference = FirebaseDatabase.getInstance().getReference("Drivers");
-        GeoFire gfdrivers = new GeoFire(drivers_reference);
-        final GeoQuery geoQuery = gfdrivers.queryAtLocation(new GeoLocation(location.getLatitude(), location.getLongitude()), radius);
+        DatabaseReference drivers_reference=FirebaseDatabase.getInstance().getReference("Drivers");
+        GeoFire gfdrivers=new GeoFire(drivers_reference);
+        final GeoQuery geoQuery=gfdrivers.queryAtLocation(new GeoLocation(location.getLatitude(),location.getLongitude()),radius);
         geoQuery.removeAllListeners();
         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
             public void onKeyEntered(String key, GeoLocation location) {
-                if (!Commons.isDriverFound) {
-                    Commons.isDriverFound = true;
-                    Commons.driver_id = key;
+                if(!Commons.isDriverFound){
+                    Commons.isDriverFound=true;
+                    Commons.driver_id=key;
                     place_pickup_request.setText("Call Driver");
                 }
             }
@@ -277,11 +250,11 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
 
             @Override
             public void onGeoQueryReady() {
-                if (!Commons.isDriverFound && radius < LIMIT) {
+                if(!Commons.isDriverFound&&radius<LIMIT){
                     radius++;
                     find_driver();
-                } else {
-                    if (!Commons.isDriverFound) {
+                }else{
+                    if(!Commons.isDriverFound) {
                         Toast.makeText(Home.this, "No Drivers available around", Toast.LENGTH_LONG).show();
                         place_pickup_request.setText("Request Pickup");
                         geoQuery.removeAllListeners();
@@ -297,32 +270,27 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
         });
 
     }
-
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
+        mMap=googleMap;
         try {
             boolean issucess = mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(Home.this, R.raw.uber_style_map));
             if (!issucess)
                 Toast.makeText(Home.this, "Error setting Map Style", Toast.LENGTH_LONG).show();
-        } catch (Resources.NotFoundException ex) {
-            ex.printStackTrace();
-        }
+        }catch(Resources.NotFoundException ex){ex.printStackTrace();}
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setZoomGesturesEnabled(true);
         mMap.setInfoWindowAdapter(new Custom_Info_Window(this));
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-
-                if (destination_location_marker != null)
+                if (place_location !=null && place_destination !=null)
+                if(destination_location_marker !=null)
                     destination_location_marker.remove();
-
-                if (location !=null && latLng !=null)
-                    destination_location_marker = mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_marker)).title("Destination").position(latLng));
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.0f));
-                BottomSheetRider f = BottomSheetRider.newinstance(String.format("%f,%f", location.getLatitude(), location.getLongitude()), String.format("%f,%f", latLng.latitude, latLng.longitude));
-                f.show(getSupportFragmentManager(), f.getTag());
+                destination_location_marker=mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_marker)).title("Destination").position(latLng));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,15.0f));
+                BottomSheetRider bottomSheetRider=BottomSheetRider.newInstance(String.format("%f,%f", location.getLatitude(), location.getLongitude()), String.format("%f,%f", latLng.latitude, latLng.longitude),true);
+                bottomSheetRider.show(getSupportFragmentManager(),bottomSheetRider.getTag());
             }
         });
         //googleMap.addMarker(new MarkerOptions().title("Rider Location").position(new LatLng(37.7750, -122.4183)));
@@ -331,21 +299,15 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
 
     private void display_location() {
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+
             return;
         }
         location = LocationServices.FusedLocationApi.getLastLocation(mgoogleApiclient);
-        if (location != null) {
-            LatLng center = new LatLng(location.getLatitude(), location.getLongitude());
-            LatLng northside = SphericalUtil.computeOffset(center, 100000, 0);
-            LatLng southside = SphericalUtil.computeOffset(center, 100000, 180);
-            LatLngBounds bounds = LatLngBounds.builder()
+        if(location!=null) {
+            LatLng center=new LatLng(location.getLatitude(),location.getLongitude());
+            LatLng northside= SphericalUtil.computeOffset(center,100000,0);
+            LatLng southside= SphericalUtil.computeOffset(center,100000,180);
+            LatLngBounds bounds=LatLngBounds.builder()
                     .include(northside)
                     .include(southside)
                     .build();
@@ -353,11 +315,11 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
             place_location.setFilter(typefilter);
             place_destination.setBoundsBias(bounds);
             place_location.setFilter(typefilter);
-            Driver_available_ref = FirebaseDatabase.getInstance().getReference("Drivers");
+            Driver_available_ref=FirebaseDatabase.getInstance().getReference("Drivers");
             Driver_available_ref.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    loadAvailabledriver(new LatLng(location.getLatitude(), location.getLongitude()));
+                    loadAvailabledriver(new LatLng(location.getLatitude(),location.getLongitude()));
                 }
 
                 @Override
@@ -366,7 +328,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
                 }
             });
 
-            loadAvailabledriver(new LatLng(location.getLatitude(), location.getLongitude()));
+            loadAvailabledriver(new LatLng(location.getLatitude(),location.getLongitude()));
         }
     }
 
@@ -374,9 +336,9 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
         mMap.clear();
         mcurrent = mMap.addMarker(new MarkerOptions().position(new LatLng(mlocation.latitude, mlocation.longitude)).title("You").icon(BitmapDescriptorFactory.fromResource(R.drawable.marker)));
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mlocation.latitude, mlocation.longitude), 15.0f));
-        DatabaseReference driverlocation = FirebaseDatabase.getInstance().getReference("Drivers");
-        GeoFire gf = new GeoFire(driverlocation);
-        GeoQuery geoQuery = gf.queryAtLocation(new GeoLocation(mlocation.latitude, mlocation.longitude), distance);
+        DatabaseReference driverlocation=FirebaseDatabase.getInstance().getReference("Drivers");
+        GeoFire gf=new GeoFire(driverlocation);
+        GeoQuery geoQuery=gf.queryAtLocation(new GeoLocation(mlocation.latitude,mlocation.longitude),distance);
         geoQuery.removeAllListeners();
         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
@@ -384,8 +346,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
                 FirebaseDatabase.getInstance().getReference("DriverInformation").child(key).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        Rider user = dataSnapshot.getValue(Rider.class);
-                        mMap.addMarker(new MarkerOptions().position(new LatLng(mlocation.latitude, mlocation.longitude)).title(user.getName()).snippet("Phone " + user.getPhone()).icon(BitmapDescriptorFactory.fromResource(R.drawable.car)));
+                        Rider user=dataSnapshot.getValue(Rider.class);
+                        mMap.addMarker(new MarkerOptions().position(new LatLng(mlocation.latitude,mlocation.longitude)).title(user.getName()).snippet("Phone "+user.getPhone()).icon(BitmapDescriptorFactory.fromResource(R.drawable.car)));
                     }
 
                     @Override
@@ -407,7 +369,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
 
             @Override
             public void onGeoQueryReady() {
-                if (distance <= LIMIT) {
+                if (distance<=LIMIT){
                     distance++;
                     loadAvailabledriver(mlocation);
                 }
@@ -429,14 +391,13 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
         LocationServices.FusedLocationApi.requestLocationUpdates(mgoogleApiclient, locationRequest, this);
     }
 
-    private void init_location_request() {
-        locationRequest = new LocationRequest();
+    private void init_location_request(){
+        locationRequest=new LocationRequest();
         locationRequest.setInterval(5000);
         locationRequest.setFastestInterval(3000);
         locationRequest.setSmallestDisplacement(10);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
-
     @Override
     protected void onStart() {
         super.onStart();
@@ -450,7 +411,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.nav_signout) {
+        if(item.getItemId()==R.id.nav_signout){
             Sign_Out();
         }
         return false;
@@ -460,7 +421,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
         Paper.init(this);
         Paper.book().destroy();
         FirebaseAuth.getInstance().signOut();
-        Intent intent = new Intent(Home.this, MainActivity.class);
+        Intent intent=new Intent(Home.this,MainActivity.class);
         startActivity(intent);
         finish();
     }
@@ -478,12 +439,12 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.e("location_connection", connectionResult.getErrorMessage());
+        Log.e("location_connection",connectionResult.getErrorMessage());
     }
 
     @Override
     public void onLocationChanged(Location location) {
-        this.location = location;
+        this.location=location;
         display_location();
     }
 }
