@@ -12,8 +12,8 @@ import com.google.android.gms.maps.model.Marker;
 
 public class Custom_Info_Window implements GoogleMap.InfoWindowAdapter {
     View v;
-    public Custom_Info_Window (Context container){
-        v= LayoutInflater.from(container).inflate(R.layout.custom_rider_info_window,null);
+    public Custom_Info_Window (Context context){
+        v= LayoutInflater.from(context).inflate(R.layout.custom_rider_info_window,null);
     }
     @Override
     public View getInfoWindow(Marker marker) {
@@ -26,7 +26,7 @@ public class Custom_Info_Window implements GoogleMap.InfoWindowAdapter {
     }
 
     @Override
-    public View getInfoContents(Marker marker) {
+    public View getInfoContents(Marker destinationMarker) {
         return null;
     }
 }

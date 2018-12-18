@@ -3,13 +3,13 @@ package asliborneo.router;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class RetrofitClient {
+public class FCMClient {
     private static Retrofit retrofit=null;
     private static Retrofit retrofit_obj_for_Directions_api=null;
     public static Retrofit getClient(String fcmURL){
         if (retrofit==null){
             retrofit=new Retrofit.Builder()
-                    .baseUrl(fcmURL)
+                    .baseUrl("https://fcm.googleapis.com/")
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
         }

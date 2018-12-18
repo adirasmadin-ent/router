@@ -68,6 +68,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static asliborneo.router.Commons.fcmURL;
 
 
 public class Home extends AppCompatActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
@@ -80,18 +81,19 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
     LatLng pickup_location;
     GoogleMap mMap;
     Marker mcurrent;
-    String pick_up_location, destination_location;
+    String mLocation, mDestination;
     Marker pick_up_location_marker, destination_location_marker;
-    ImageView expandable_image;
+    ImageView imgExpandable;
     Button place_pickup_request;
     NavigationView nav_view;
     AutocompleteFilter typefilter;
     int radius = 1;
     int distance = 3;
-    PlaceAutocompleteFragment pick_up_place, destination_place;
+    PlaceAutocompleteFragment place_location, place_destination;
     private static final int LIMIT = 3;
     DatabaseReference Driver_available_ref;
     private static final String TAG = "Home";
+    IFCMService mFCMService;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -121,16 +123,14 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
 
             }
         });
-        pick_up_place = (PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.location);
-        destination_place = (PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.destination);
-        pick_up_place.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+        imgExpandable = findViewById(R.id.imgexpandable);
+        place_location = (PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.location);
+        place_destination = (PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.destination);
+        place_location.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
                 mMap.clear();
-                pickup_location = place.getLatLng();
-                location.setLatitude(place.getLatLng().latitude);
-                location.setLongitude(place.getLatLng().longitude);
-                pick_up_location = place.getAddress().toString();
+                mLocation = place.getAddress().toString();
                 pick_up_location_marker = mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("Pick Up Here").icon(BitmapDescriptorFactory.fromResource(R.drawable.marker)));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 15.0f));
             }
@@ -140,15 +140,15 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
 
             }
         });
-        destination_place.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+        place_destination.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
 
-                destination_location = place.getAddress().toString();
+                mDestination = place.getAddress().toString();
                 destination_location_marker = mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("Destination").icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_marker)));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 15.0f));
-                bottom_sheet_rider_fragment bsrf = bottom_sheet_rider_fragment.newinstance(String.format("%f,%f", location.getLatitude(), location.getLongitude()), destination_location, false);
-                bsrf.show(getSupportFragmentManager(), bsrf.getTag());
+                BottomSheetRider f = BottomSheetRider.newinstance(mLocation, mDestination);
+
             }
 
             @Override
@@ -156,6 +156,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
 
             }
         });
+
+        mFCMService = Commons.getFCMService();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Create channel to show notifications.
@@ -203,8 +205,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
                     String rider_token = FirebaseInstanceId.getInstance().getToken();
                     Notification data = new Notification(rider_token, Lat_lng);
                     sender content = new sender(data, token.getToken());
-                    FCMService fcmService = RetrofitClient.getClient().create(FCMService.class);
-                    Call<fcm_response> call = fcmService.send_message(content);
+                    IFCMService mFCMService = FCMClient.getClient(fcmURL).create(IFCMService.class);
+                    Call<fcm_response> call = mFCMService.send_message(content);
                     call.enqueue(new Callback<fcm_response>() {
                         @Override
                         public void onResponse(Call<fcm_response> call, Response<fcm_response> response) {
@@ -317,10 +319,10 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
                     destination_location_marker.remove();
 
                 if (location !=null && latLng !=null)
-                destination_location_marker = mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_marker)).title("Destination").position(latLng));
+                    destination_location_marker = mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_marker)).title("Destination").position(latLng));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.0f));
-                bottom_sheet_rider_fragment bsrf = bottom_sheet_rider_fragment.newinstance(String.format("%f,%f", location.getLatitude(), location.getLongitude()), String.format("%f,%f", latLng.latitude, latLng.longitude), true);
-                bsrf.show(getSupportFragmentManager(), bsrf.getTag());
+                BottomSheetRider f = BottomSheetRider.newinstance(String.format("%f,%f", location.getLatitude(), location.getLongitude()), String.format("%f,%f", latLng.latitude, latLng.longitude));
+                f.show(getSupportFragmentManager(), f.getTag());
             }
         });
         //googleMap.addMarker(new MarkerOptions().title("Rider Location").position(new LatLng(37.7750, -122.4183)));
@@ -347,10 +349,10 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
                     .include(northside)
                     .include(southside)
                     .build();
-            pick_up_place.setBoundsBias(bounds);
-            pick_up_place.setFilter(typefilter);
-            destination_place.setBoundsBias(bounds);
-            pick_up_place.setFilter(typefilter);
+            place_location.setBoundsBias(bounds);
+            place_location.setFilter(typefilter);
+            place_destination.setBoundsBias(bounds);
+            place_location.setFilter(typefilter);
             Driver_available_ref = FirebaseDatabase.getInstance().getReference("Drivers");
             Driver_available_ref.addValueEventListener(new ValueEventListener() {
                 @Override
@@ -421,13 +423,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
 
     private void get_location_updates() {
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+
             return;
         }
         LocationServices.FusedLocationApi.requestLocationUpdates(mgoogleApiclient, locationRequest, this);

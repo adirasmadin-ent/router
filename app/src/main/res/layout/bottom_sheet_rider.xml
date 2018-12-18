@@ -53,7 +53,7 @@
                 android:background="@android:color/holo_orange_light"/>
 
             <TextView
-                android:id="@+id/txtlocation"
+                android:id="@+id/location"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
 
@@ -89,7 +89,7 @@
                 android:background="@android:color/holo_orange_light"/>
 
             <TextView
-                android:id="@+id/txtdestination"
+                android:id="@+id/destination"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
 

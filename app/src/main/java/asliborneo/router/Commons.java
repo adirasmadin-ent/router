@@ -2,8 +2,6 @@ package asliborneo.router;
 
 import android.location.Location;
 
-import retrofit2.Retrofit;
-
 public class Commons {
 public static Location mLastLocation;
 
@@ -16,15 +14,23 @@ public static Location mLastLocation;
     private static double Distance_Rate=1.75;
     public  static  Boolean isDriverFound=false;
     public static String  driver_id="";
-
-    public static String fcmURL = "https://fcm.google.com/";
+    public static final String googleAPIUrl ="https://maps.googleapis.com";
+    public static String fcmURL = "https://fcm.googleapis.com/";
     public static final java.lang.String user_field="usr";
     public static final java.lang.String password_field="pwd";
     public static double getPrice(double km,int min){
         return (Base_Fare+(Time_Rate*min)+(Distance_Rate*km));
     }
 
+    public static IFCMService getFCMService()
+    {
+        return RetrofitClient.getClient(fcmURL).create(IFCMService.class);
+    }
 
+    public static IGoogleMAPApi getGoogleService()
+    {
+        return GoogleMAPApi.getClient(googleAPIUrl).create(IGoogleMAPApi.class);
+    }
 
 
 }
