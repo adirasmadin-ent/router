@@ -1,5 +1,6 @@
 package asliborneo.router;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -9,6 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -25,6 +27,7 @@ import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationListener;
@@ -66,6 +69,8 @@ import retrofit2.Response;
 
 
 public class Home extends AppCompatActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+    private static final int MY_PERMISSION_REQUEST_CODE = 1;
+    private static final int PLAY_SERVICE_RESOLUTION_REQUEST =10 ;
     Toolbar toolbar;
     ActionBarDrawerToggle toggle;
     DrawerLayout drawer_layout;
@@ -81,6 +86,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
     Button place_pickup_request;
     NavigationView nav_view;
     AutocompleteFilter typefilter;
+    BottomSheetRider bottomSheetRider;
     int radius=1;
     int distance=3;
     PlaceAutocompleteFragment place_location,place_destination;
@@ -126,8 +132,9 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
             public void onPlaceSelected(Place place) {
                 mMap.clear();
                 mPlaceLocation = place.getAddress().toString();
-                pick_up_location_marker = mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("Pick Up Here").icon(BitmapDescriptorFactory.fromResource(R.drawable.marker)));
+              //  mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("Pin Location").icon(BitmapDescriptorFactory.fromResource(R.drawable.marker)));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 15.0f));
+
             }
 
             @Override
@@ -160,7 +167,35 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
         mgoogleApiclient.connect();
         init_location_request();
         update_firebase_token();
+        setupLocation();
 
+    }
+    private boolean checkPlayServices() {
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        if(resultCode != ConnectionResult.SUCCESS){
+            if(GooglePlayServicesUtil.isUserRecoverableError(resultCode)){
+                GooglePlayServicesUtil.getErrorDialog(resultCode, this, PLAY_SERVICE_RESOLUTION_REQUEST).show();
+            }else{
+                Toast.makeText(this, "This device is not supported", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+            return false;
+        }
+        return true;
+    }
+
+    private void setupLocation() {
+        if (ActivityCompat.checkSelfPermission(Home.this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(Home.this, new String[]{
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION
+            }, MY_PERMISSION_REQUEST_CODE);
+
+        } else {
+            if(checkPlayServices()) {
+
+                display_location();
+            }
+        }
     }
     private void update_firebase_token() {
         FirebaseDatabase db=FirebaseDatabase.getInstance();
@@ -213,7 +248,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
         geoFire.setLocation(uid, new GeoLocation(location.getLatitude(), location.getLongitude()), new GeoFire.CompletionListener() {
             @Override
             public void onComplete(String key, DatabaseError error) {
-                if(mcurrent.isVisible())
+                if(mcurrent !=null)
                     mcurrent.remove();
                 mcurrent= mMap.addMarker(new MarkerOptions().title("Pick Up Here").position(new LatLng(location.getLatitude(),location.getLongitude())).snippet("").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
                 mcurrent.showInfoWindow();
@@ -275,13 +310,19 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
     public void onMapReady(GoogleMap googleMap) {
         mMap=googleMap;
         try {
-            boolean issucess = mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(Home.this, R.raw.uber_style_map));
+            boolean issucess = mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(Home.this, R.raw.mymapstyle));
             if (!issucess)
                 Toast.makeText(Home.this, "Error setting Map Style", Toast.LENGTH_LONG).show();
         }catch(Resources.NotFoundException ex){ex.printStackTrace();}
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setZoomGesturesEnabled(true);
+        mMap.setTrafficEnabled(true);
+        mMap.setIndoorEnabled(true);
+        mMap.setBuildingsEnabled(true);
         mMap.setInfoWindowAdapter(new Custom_Info_Window(this));
+        mMap.setMyLocationEnabled(true);
+        enableMyLocation();
+
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
@@ -297,6 +338,20 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
         //googleMap.addMarker(new MarkerOptions().title("Rider Location").position(new LatLng(37.7750, -122.4183)));
         //googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(37.7750, -122.4183), 15.0f));
     }
+
+    private void enableMyLocation() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Permission to access the location is missing.
+            PermissionUtils.requestPermission(this, MY_PERMISSION_REQUEST_CODE,
+                    Manifest.permission.ACCESS_FINE_LOCATION, true);
+        } else if (mMap != null) {
+            // Access to the location has been granted to the app.
+            mMap.setMyLocationEnabled(true);
+        }
+    }
+
+
 
     private void display_location() {
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -333,13 +388,13 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
         }
     }
 
-    private void loadAvailabledriver(final LatLng mlocation) {
+    private void loadAvailabledriver(final LatLng location) {
         mMap.clear();
-        mcurrent = mMap.addMarker(new MarkerOptions().position(new LatLng(mlocation.latitude, mlocation.longitude)).title("You").icon(BitmapDescriptorFactory.fromResource(R.drawable.marker)));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mlocation.latitude, mlocation.longitude), 15.0f));
+       // mcurrent = mMap.addMarker(new MarkerOptions().position(location).title("You").icon(BitmapDescriptorFactory.fromResource(R.drawable.marker)));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.latitude, location.longitude), 15.0f));
         DatabaseReference driverlocation=FirebaseDatabase.getInstance().getReference("Drivers");
         GeoFire gf=new GeoFire(driverlocation);
-        GeoQuery geoQuery=gf.queryAtLocation(new GeoLocation(mlocation.latitude,mlocation.longitude),distance);
+        GeoQuery geoQuery=gf.queryAtLocation(new GeoLocation(location.latitude,location.longitude),distance);
         geoQuery.removeAllListeners();
         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
@@ -348,7 +403,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         Rider user=dataSnapshot.getValue(Rider.class);
-                        mMap.addMarker(new MarkerOptions().position(new LatLng(mlocation.latitude,mlocation.longitude)).title(user.getName()).snippet("Phone "+user.getPhone()).icon(BitmapDescriptorFactory.fromResource(R.drawable.car)));
+                        mMap.addMarker(new MarkerOptions().position(new LatLng(location.latitude,location.longitude)).title(user.getName()).snippet("Phone "+user.getPhone()).icon(BitmapDescriptorFactory.fromResource(R.drawable.car)));
                     }
 
                     @Override
@@ -372,7 +427,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
             public void onGeoQueryReady() {
                 if (distance<=LIMIT){
                     distance++;
-                    loadAvailabledriver(mlocation);
+                    loadAvailabledriver(location);
                 }
             }
 
