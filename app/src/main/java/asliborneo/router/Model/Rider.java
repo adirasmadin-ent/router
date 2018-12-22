@@ -1,7 +1,7 @@
 package asliborneo.router.Model;
 
 public class Rider {
-    private String name, email, password, phone;
+    private String name,email,password,phone;
 
     public Rider(String name, String email, String password, String phone) {
         this.name = name;
@@ -9,11 +9,9 @@ public class Rider {
         this.password = password;
         this.phone = phone;
     }
-
-    public Rider() {
+    public Rider(){
 
     }
-
     public String getName() {
         return name;
     }

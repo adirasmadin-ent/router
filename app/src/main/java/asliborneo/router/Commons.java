@@ -4,14 +4,15 @@ import android.location.Location;
 
 public class Commons {
 public static Location mLastLocation;
-
+    public static final String tokenTable ="Tokens";
     public static final String driver_location="Drivers";
     public static final String Registered_driver="DriverInformation";
     public static final String Registered_Riders="RidersInformation";
     public static final String pickUpRequest_tbl="PickUpRequest";
+    public static final String rateDetail_table="Driver_Rating";
     private static double Base_Fare=2.50;
-    private static double Time_Rate=0.3;
-    private static double Distance_Rate=0.60;
+    private static double Time_Rate=0.25;
+    private static double Distance_Rate=0.50;
     public  static  Boolean isDriverFound=false;
     public static String  driver_id="";
     public static final String googleAPIUrl ="https://maps.googleapis.com";
@@ -24,7 +25,7 @@ public static Location mLastLocation;
 
     public static IFCMService getFCMService()
     {
-        return RetrofitClient.getClient(fcmURL).create(IFCMService.class);
+        return FCMClient.getClient(fcmURL).create(IFCMService.class);
     }
 
     public static IGoogleMAPApi getGoogleService()

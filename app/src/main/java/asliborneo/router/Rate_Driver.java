@@ -11,7 +11,6 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -23,6 +22,7 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
+import asliborneo.router.Model.Rate;
 import dmax.dialog.SpotsDialog;
 import me.zhanghai.android.materialratingbar.MaterialRatingBar;
 
@@ -38,8 +38,8 @@ public class Rate_Driver extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_rate_driver);
         database=FirebaseDatabase.getInstance();
-        rating_detail_ref=database.getReference("Driver_Rating");
-        Driverinformationref=database.getReference("DriverInformation");
+        rating_detail_ref=database.getReference(Commons.rateDetail_table);
+        Driverinformationref=database.getReference(Commons.Registered_driver);
         btn_submit=(Button) findViewById(R.id.btn_submit);
         comment=(MaterialEditText) findViewById(R.id.comment);
         ratingBar=(MaterialRatingBar) findViewById(R.id.ratingbar);

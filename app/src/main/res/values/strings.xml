@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">route.r</string>
-    <string name="google_browser_api">AIzaSyBtssbTB-BQGwYZaCNgS9GScZLW13TQK-U</string>
+    <string name="google_browser_api">AIzaSyAxh5q4g1xyvvYaDSChIhlweqfAt8o8udA</string>
     <string name="title_activity_home">Home</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
@@ -15,7 +15,7 @@
     <string name="location_permission_denied">permission denied</string>
     <string name="permission_required_toast">require toast</string>
     <string name="permission_rationale_location">rationale location</string>
-    <string name="final_calculate">%s + %s = $%.2f</string>
+    <string name="final_calculate">%s + %s = RM%.2f</string>
     <string name="default_notification_channel_id">1</string>
     <string name="default_notification_channel_name">route.r</string>
 </resources>
