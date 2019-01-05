@@ -48,7 +48,7 @@ public class BottomSheetRider extends BottomSheetDialogFragment {
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@Nullable LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v=inflater.inflate(R.layout.bottom_sheet_rider,container,false);
         txtLocation = (TextView) v.findViewById(R.id.location);
         txtDestination = (TextView) v.findViewById(R.id.destination);

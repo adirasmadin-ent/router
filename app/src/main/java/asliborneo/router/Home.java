@@ -133,8 +133,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
     LocationCallback locationCallback;
     CircleImageView imageAvatar;
     TextView txtRiderName, txtStars;
-    ImageView teksi_enabled,teksi_disabled;
-    boolean isTeksi =true;
+    ImageView teksiEnabled,teksi_disabled;
+    boolean isTeksi =false;
 
     LocationRequest mLocationRequest;
     Marker mUserMarker;
@@ -184,21 +184,22 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
             }
 
             teksi_disabled = (ImageView) findViewById(R.id.teksi_disabled);
-            teksi_enabled= (ImageView) findViewById(R.id.teksi_enabled);
+            teksiEnabled= (ImageView) findViewById(R.id.ic_enabled);
 
-            teksi_enabled.setOnClickListener(new View.OnClickListener() {
+            teksiEnabled.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     isTeksi=true;
-                    if(isTeksi)
+                    if (Commons.currentUser !=null)
                     {
-                        teksi_enabled.setImageResource(R.id.teksi_enabled);
+
+                        teksiEnabled.setImageResource(R.id.ic_enabled);
                         teksi_disabled.setImageResource(R.id.teksi_disabled);
                     }
                     else
                     {
-                        teksi_enabled.setImageResource(R.id.teksi_disabled);
-                        teksi_disabled.setImageResource(R.id.teksi_enabled);
+                        teksiEnabled.setImageResource(R.id.teksi_disabled);
+                        teksi_disabled.setImageResource(R.id.ic_enabled);
                     }
                     mMap.clear();
                     loadAvailabledriver(new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude()));
@@ -211,13 +212,13 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
                     isTeksi=true;
                     if(isTeksi)
                     {
-                        teksi_enabled.setImageResource(R.id.teksi_enabled);
+                        teksiEnabled.setImageResource(R.id.ic_enabled);
                         teksi_disabled.setImageResource(R.id.teksi_disabled);
                     }
                     else
                     {
-                        teksi_enabled.setImageResource(R.id.teksi_disabled);
-                        teksi_disabled.setImageResource(R.id.teksi_enabled);
+                        teksiEnabled.setImageResource(R.id.teksi_disabled);
+                        teksi_disabled.setImageResource(R.id.ic_enabled);
                     }
                     mMap.clear();
                     loadAvailabledriver(new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude()));
