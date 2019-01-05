@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">route.r</string>
-    <string name="google_browser_api">AIzaSyAxh5q4g1xyvvYaDSChIhlweqfAt8o8udA</string>
+    <string name="app_name">ROUTE </string>
+    <string name="google_browser_api">AIzaSyClpfgiCLOlgB9ZxnSLm6vaUj4bVyAmoWA</string>
     <string name="title_activity_home">Home</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
@@ -16,6 +16,14 @@
     <string name="permission_required_toast">require toast</string>
     <string name="permission_rationale_location">rationale location</string>
     <string name="final_calculate">%s + %s = RM%.2f</string>
-    <string name="default_notification_channel_id">1</string>
-    <string name="default_notification_channel_name">route.r</string>
+    <string name="default_notification_channel_id">asliborneo.router</string>
+    <string name="default_notification_channel_name">Route Notification</string>
+    <string name="FACEBOOK_APP_ID">1232083650264469</string>
+    <string name="ACCOUNT_KIT_CLIENT_TOKEN">ca82e10846c4721f4c4bbac3e75e6a48</string>
+    <string name="driver_name">Driver Name :</string>
+    <string name="phone">Phone :</string>
+    <string name="rate">Rate :</string>
+    <string name="btn_request_pickup">SEND REQUEST PICKUP</string>
+    <string name="btn_call_driver">CALL DRIVER</string>
+    <string name="btn_cancel">CANCEL</string>
 </resources>

@@ -1,6 +1,6 @@
 package asliborneo.router.Model;
 
-public class Rider {
+public class RouteDriver {
     private String name;
 
     private String phone;
@@ -48,7 +48,7 @@ public class Rider {
         this.carType = carType;
     }
 
-    public Rider(String name, String phone, String rates, String avatarUrl, String carType) {
+    public RouteDriver(String name, String phone, String rates, String avatarUrl, String carType) {
 
         this.name = name;
         this.phone = phone;
@@ -57,7 +57,7 @@ public class Rider {
         this.carType = carType;
     }
 
-    public Rider() {
+    public RouteDriver() {
 
     }
 }

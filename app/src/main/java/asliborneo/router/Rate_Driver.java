@@ -63,10 +63,10 @@ public class Rate_Driver extends AppCompatActivity {
         Rate rate=new Rate();
         rate.setRates(String.valueOf(rating_stars));
         rate.setComments(comment.getText().toString());
-        rating_detail_ref.child(Commons.driver_id).push().setValue(rate).addOnCompleteListener(new OnCompleteListener<Void>() {
+        rating_detail_ref.child(Commons.driverId).push().setValue(rate).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                rating_detail_ref.child(Commons.driver_id).addValueEventListener(new ValueEventListener() {
+                rating_detail_ref.child(Commons.driverId).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         double average_stars=0.0;
@@ -81,7 +81,7 @@ public class Rate_Driver extends AppCompatActivity {
                         String value_update=df.format(final_average_stars);
                         Map<String,Object> driver_rating_update=new HashMap<>();
                         driver_rating_update.put("rates",value_update);
-                        Driverinformationref.child(Commons.driver_id).updateChildren(driver_rating_update).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        Driverinformationref.child(Commons.driverId).updateChildren(driver_rating_update).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if(task.isSuccessful()) {

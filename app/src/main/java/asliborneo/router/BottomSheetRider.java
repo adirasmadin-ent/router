@@ -2,6 +2,7 @@ package asliborneo.router;
 
 import android.app.Fragment;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.util.Log;
@@ -45,9 +46,9 @@ public class BottomSheetRider extends BottomSheetDialogFragment {
 
         Tap_on_map=getArguments().getBoolean("Tap_on_map");
     }
-    @Nullable
+
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v=inflater.inflate(R.layout.bottom_sheet_rider,container,false);
         txtLocation = (TextView) v.findViewById(R.id.location);
         txtDestination = (TextView) v.findViewById(R.id.destination);
@@ -56,6 +57,7 @@ public class BottomSheetRider extends BottomSheetDialogFragment {
         if (!Tap_on_map) {
             txtLocation.setText(mLocation);
             txtDestination.setText(mDestination);
+
         }
         return v;
     }
@@ -71,10 +73,12 @@ public class BottomSheetRider extends BottomSheetDialogFragment {
 
             Log.e("LINK", requestUrl);
             mService.getPath(requestUrl).enqueue(new Callback<String>() {
+
                 @Override
                 public void onResponse(Call<String> call, Response<String> response) {
+
                     try {
-                        JSONObject jsonObject = new JSONObject(response.body().toString());
+                        JSONObject jsonObject = new JSONObject(response.body());
                         JSONArray routes = jsonObject.getJSONArray("routes");
 
                         JSONObject object = routes.getJSONObject(0);

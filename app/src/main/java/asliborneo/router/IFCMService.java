@@ -1,5 +1,6 @@
 package asliborneo.router;
 
+import asliborneo.router.Model.DataMessage;
 import asliborneo.router.Model.FCMResponse;
 import asliborneo.router.Model.Sender;
 import retrofit2.Call;
@@ -11,8 +12,8 @@ import retrofit2.http.POST;
 public interface IFCMService {
     @Headers({
             "Content-Type:application/json",
-            "Authorization:key=AAAAaCv3G_M:APA91bGc1_PbWz8_jf7N4oY6pX4f8vSfiegfXUd5gfmUi5sPnPjjLjk7xlQGcRsLiFHx2k-q6D9HHizTAyL9jIqMXQRGePtLPiQA3LZBp8UyVLnPQgF7EAsPEXJqBxBMoLaVgy0qTijS"
+            "Authorization:key=AAAAaCv3G_M:APA91bHjxWwRtJmQg_zWVTrD9RWrzR0JTnpnoiZlRsEhrWiGtXP_tESjdlirLODnA_dMR5ny_zZhVP9Ix6XTg68MhvRCzJWfdBRwT54GL7hqb2x8q8gX-q96zpL6Wq2xmrElU6iYhhQo"
     })
     @POST("fcm/send")
-    Call<FCMResponse> sendMessage(@Body Sender body);
+    Call<FCMResponse> sendMessage(@Body DataMessage body);
 }

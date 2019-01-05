@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#008577</color>
+    <color name="colorPrimary">#ffffff</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
     <color name="bottomtext">#00574B</color>
+    <color name="navigation">@android:color/white</color>
+    <color name="buttonPickupRequest">#f95aac9c</color>
+    <color name="bgMain">#765aac9c</color>
+    <color name="background_material_light">#ffffff</color>
+    <color name="primary_material_light">#f9d23a</color>
 </resources>

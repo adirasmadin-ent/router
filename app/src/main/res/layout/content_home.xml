@@ -22,19 +22,36 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-            <ImageView
-                app:srcCompat="@drawable/ic_arrow_drop_down_circle_black_24dp"
-                android:layout_width="match_parent"
-                android:id="@+id/imgexpandable"
-                android:layout_alignParentEnd="true"
-                android:layout_height="wrap_content" />
+
+            <LinearLayout
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/select_car_group"
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <ImageView
+                    android:id="@+id/teksi_enabled"
+                    android:layout_marginRight="8dp"
+                    android:src="@drawable/carenabled"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp" />
+                <ImageView
+                    android:id="@+id/teksi_disabled"
+                    android:layout_marginLeft="8dp"
+                    android:src="@drawable/cardisabled"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp" />
+
+            </LinearLayout>
             <Button
+                android:layout_below="@+id/select_car_group"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Request Pick up"
                 android:background="@android:color/darker_gray"
                 android:textColor="#fff"
-                android:layout_below="@id/imgexpandable"
                 android:layout_margin="10dp"
                 android:id="@+id/btnpickuprequest"
                 />
