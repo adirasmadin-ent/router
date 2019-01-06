@@ -28,7 +28,7 @@ public class Commons {
 
 public static Rider currentUser;
 
-
+    public static final String CANCEL_BROADCAST = "cancel_pickup";
     public static final String tokenTable ="Tokens";
     public static final String driver_location="Drivers";
     public static final String Registered_driver="DriverInformation";

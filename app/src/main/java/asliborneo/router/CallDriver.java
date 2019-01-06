@@ -62,43 +62,21 @@ public class CallDriver extends AppCompatActivity {
         btn_call_driver.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (driverId !=null && !driverId.isEmpty())
-                    Commons.sendRequestToDriver(driverId,mFCMService,getBaseContext(),mLastLocation);
-
-
-                Intent intent = new Intent(CallDriver.this,Home.class);
-                startActivity(intent);
-            }
-        });
-
-
-
-        btn_msg_driver.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
                 Intent intent = new Intent(Intent.ACTION_CALL);
                 intent.setData(Uri.parse("tel:" + txt_phone.getText().toString()));
 
 
 
-               if (ActivityCompat.checkSelfPermission(getBaseContext(), Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED)
+                if (ActivityCompat.checkSelfPermission(getBaseContext(), Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED)
                 {
-                return;
+                    return;
                 }
                 startActivity(intent);
-            }
-        });
 
-        btn_cancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(CallDriver.this,Home.class);
-                intent.putExtra("lat", mLastLocation.getLatitude());
-                intent.putExtra("lng", mLastLocation.getLongitude());
-                startActivity(intent);
 
             }
         });
+
         if (getIntent() !=null)
         {
             driverId=getIntent().getStringExtra("driverId");
@@ -109,9 +87,30 @@ public class CallDriver extends AppCompatActivity {
             mLastLocation.setLatitude(lat);
             mLastLocation.setLongitude(lng);
 
-            loadDriverInfo(driverId);
+
 
         }
+
+        btn_msg_driver.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (driverId !=null && !driverId.isEmpty())
+                    Commons.sendRequestToDriver(driverId,mFCMService,getBaseContext(),mLastLocation);
+
+
+                finish();
+
+            }
+        });
+
+        btn_cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+              finish();
+
+            }
+        });
+        loadDriverInfo(driverId);
 
 
     }

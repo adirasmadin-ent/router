@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -28,6 +29,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 
+import asliborneo.router.Commons;
 import asliborneo.router.Model.Token;
 import asliborneo.router.NotificationHelper;
 import asliborneo.router.R;
@@ -60,6 +62,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         }
                     });
 
+                    LocalBroadcastManager.getInstance(MyFirebaseMessagingService.this)
+                            .sendBroadcast(new Intent(Commons.CANCEL_BROADCAST));
+
                 } else if (title.equals("Arrived Notification")) {
                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                         showArrivedNotificationAPI26(message);
@@ -67,6 +72,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                        show_arrived_notification(message);
 
                 } else if (title.equals("Drop Off")) {
+                    open_rating_activity(message);
+                }  else if (title.equals("Notification")) {
                     open_rating_activity(message);
                 }
 

@@ -3,8 +3,11 @@ package asliborneo.router;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.location.Location;
@@ -17,6 +20,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -105,7 +109,7 @@ import static asliborneo.router.Commons.fcmURL;
 import static asliborneo.router.R.layout.activity_home;
 
 
-public class Home extends AppCompatActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener,  GoogleMap.OnInfoWindowClickListener  {
+public class Home extends AppCompatActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener,  GoogleMap.OnInfoWindowClickListener,ValueEventListener  {
     private static final int MY_PERMISSION_REQUEST_CODE = 1;
     private static final int PLAY_SERVICE_RESOLUTION_REQUEST =10 ;
     Toolbar toolbar;
@@ -146,6 +150,13 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
     PlaceAutocompleteFragment place_location,place_destination;
     private static final int LIMIT=3;
     DatabaseReference Driver_available_ref;
+    private BroadcastReceiver mCancelBroadCast = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            place_pickup_request.setText("REQUEST PICK UP");
+        }
+    };
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -161,7 +172,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
         drawer_layout.addDrawerListener(toggle);
         toggle.syncState();
 
-
+        LocalBroadcastManager.getInstance(this)
+                .registerReceiver(mCancelBroadCast,new IntentFilter(Commons.CANCEL_BROADCAST));
 
 
         storage = FirebaseStorage.getInstance();
@@ -472,7 +484,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
                 if (place_location !=null && place_destination !=null)
                     if(destination_location_marker !=null)
                         destination_location_marker.remove();
-                destination_location_marker=mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_marker)).title("Destination").position(latLng));
+                destination_location_marker=mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.des)).title("Destination").position(latLng));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,15.0f));
                 BottomSheetRider bottomSheetRider=BottomSheetRider.newInstance(String.format("%f,%f", mLastLocation.getLatitude(), mLastLocation.getLongitude()), String.format("%f,%f", latLng.latitude, latLng.longitude),true);
                 bottomSheetRider.show(getSupportFragmentManager(),bottomSheetRider.getTag());
@@ -794,4 +806,19 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
     }
 
 
+    @Override
+    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+        loadAvailabledriver(new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude()));
+    }
+
+    @Override
+    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mCancelBroadCast);
+        super.onDestroy();
+    }
 }
