@@ -59,17 +59,17 @@ public class CallDriver extends AppCompatActivity {
         btn_cancel = (Button) findViewById( R.id.btn_cancel);
 
 
-//        btn_call_driver.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                if (driverId !=null && !driverId.isEmpty())
-//                    Commons.sendRequestToDriver(driverId,mFCMService,getBaseContext(),mLastLocation);
-//
-//
-//                Intent intent = new Intent(CallDriver.this,Home.class);
-//                startActivity(intent);
-//            }
-//        });
+        btn_call_driver.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (driverId !=null && !driverId.isEmpty())
+                    Commons.sendRequestToDriver(driverId,mFCMService,getBaseContext(),mLastLocation);
+
+
+                Intent intent = new Intent(CallDriver.this,Home.class);
+                startActivity(intent);
+            }
+        });
 
 
 

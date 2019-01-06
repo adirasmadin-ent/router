@@ -102,7 +102,7 @@ import retrofit2.Response;
 
 import static asliborneo.router.Commons.driverId;
 import static asliborneo.router.Commons.fcmURL;
-
+import static asliborneo.router.R.layout.activity_home;
 
 
 public class Home extends AppCompatActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener,  GoogleMap.OnInfoWindowClickListener  {
@@ -123,11 +123,11 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
     Button place_pickup_request;
     NavigationView nav_view;
     AutocompleteFilter typefilter;
-    BottomSheetRider bottomSheetRider;
 
-    private static int UPDATE_INTERVAL = 5000;
-    private static int FASTEST_INTERVAL = 3000;
-    private static int DISPLACEMENT = 10;
+
+  static int UPDATE_INTERVAL = 5000;
+    static int FASTEST_INTERVAL = 3000;
+    static int DISPLACEMENT = 10;
 
     FusedLocationProviderClient fusedLocationProviderClient;
     LocationCallback locationCallback;
@@ -149,7 +149,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
+        setContentView(activity_home);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         SupportMapFragment MapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -160,8 +160,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
                 this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer_layout.addDrawerListener(toggle);
         toggle.syncState();
-        nav_view=(NavigationView) findViewById(R.id.nav_view);
-        nav_view.setNavigationItemSelectedListener(this);
+
+
 
 
         storage = FirebaseStorage.getInstance();
@@ -195,6 +195,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
 
                         teksiEnabled.setImageResource(R.id.ic_enabled);
                         teksi_disabled.setImageResource(R.id.teksi_disabled);
+                        Toast.makeText(Home.this, "enabled clicked", Toast.LENGTH_SHORT).show();
                     }
                     else
                     {
@@ -209,8 +210,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
             teksi_disabled.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    isTeksi=true;
-                    if(isTeksi)
+
+                    if(!isTeksi )
                     {
                         teksiEnabled.setImageResource(R.id.ic_enabled);
                         teksi_disabled.setImageResource(R.id.teksi_disabled);
@@ -257,7 +258,9 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
         });
 
         place_location = (PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.location);
+        place_location.setHint("Enter Your Location");
         place_destination = (PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.destination);
+        place_destination.setHint("Enter Your Destination");
         place_location.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
