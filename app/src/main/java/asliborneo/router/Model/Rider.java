@@ -7,6 +7,20 @@ public class Rider {
     private String rates;
     private String avatarUrl;
     private String carType;
+    private String wallet;
+
+    public String getWallet() {
+        return wallet;
+    }
+
+    public void setWallet(String wallet) {
+        this.wallet = wallet;
+    }
+
+    public Rider(String wallet) {
+
+        this.wallet = wallet;
+    }
 
     public String getName() {
         return name;

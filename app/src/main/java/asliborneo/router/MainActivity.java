@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.telephony.PhoneNumberUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
@@ -21,6 +20,7 @@ import com.facebook.accountkit.AccountKitLoginResult;
 import com.facebook.accountkit.ui.AccountKitActivity;
 import com.facebook.accountkit.ui.AccountKitConfiguration;
 import com.facebook.accountkit.ui.LoginType;
+
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.FirebaseApp;
@@ -32,6 +32,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
+import asliborneo.router.Commons.Common;
+import asliborneo.router.JomRide.Home;
 import asliborneo.router.Model.Rider;
 import io.paperdb.Paper;
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
@@ -42,6 +44,9 @@ public class MainActivity extends AppCompatActivity {
     Button btnContinue;
     FirebaseAuth auth;
     FirebaseDatabase db;
+    private static final String TAG = "MainActivity";
+
+
 
     DatabaseReference Rider;
     MaterialEditText email,password,name,phone;
@@ -65,7 +70,6 @@ public class MainActivity extends AppCompatActivity {
         Rider=db.getReference("RidersInformation");
 
 
-
         btnContinue= findViewById(R.id.btnContinue);
 
         btnContinue.setOnClickListener(new View.OnClickListener() {
@@ -84,8 +88,8 @@ public class MainActivity extends AppCompatActivity {
                             .addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                    Commons.currentUser = dataSnapshot.getValue(Rider.class);
-                                    Intent homeIntent = new Intent(MainActivity.this, Home.class);
+                                    Common.currentUser = dataSnapshot.getValue(Rider.class);
+                                    Intent homeIntent = new Intent(MainActivity.this, MainMenu.class);
                                     startActivity(homeIntent);
                                     finish();
                                 }
@@ -176,7 +180,8 @@ public class MainActivity extends AppCompatActivity {
                                                     user.setPhone(account.getPhoneNumber().toString());
                                                     user.setName(account.getPhoneNumber().toString());
                                                     user.setAvatarUrl("");
-                                                    user.setRates("0.0");
+                                                    user.setWallet("0.00");
+                                                    user.setCarType("NON MEMBERSHIP");
 
                                                     Rider.child(userPhone)
                                                             .setValue(user)
@@ -188,8 +193,8 @@ public class MainActivity extends AppCompatActivity {
                                                                             .addListenerForSingleValueEvent(new ValueEventListener() {
                                                                                 @Override
                                                                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                                                    Commons.currentUser= dataSnapshot.getValue(Rider.class);
-                                                                                    Intent homeIntent = new Intent(MainActivity.this, Home.class);
+                                                                                    Common.currentUser= dataSnapshot.getValue(Rider.class);
+                                                                                    Intent homeIntent = new Intent(MainActivity.this, MainMenu.class);
                                                                                     startActivity(homeIntent);
                                                                                     finish();
                                                                                 }
@@ -213,8 +218,8 @@ public class MainActivity extends AppCompatActivity {
                                                             .addListenerForSingleValueEvent(new ValueEventListener() {
                                                                 @Override
                                                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                                    Commons.currentUser = dataSnapshot.getValue(Rider.class);
-                                                                    Intent homeIntent = new Intent(MainActivity.this, Home.class);
+                                                                    Common.currentUser = dataSnapshot.getValue(Rider.class);
+                                                                    Intent homeIntent = new Intent(MainActivity.this, MainMenu.class);
                                                                     startActivity(homeIntent);
                                                                     finish();
                                                                 }
@@ -248,7 +253,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void goToMyLoggedInActivity() {
-        Intent intent = new Intent(MainActivity.this,Home.class);
+        Intent intent = new Intent(MainActivity.this,MainMenu.class);
         startActivity(intent);
         finish();
 

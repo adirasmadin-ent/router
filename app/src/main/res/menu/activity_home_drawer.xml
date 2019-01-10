@@ -14,5 +14,10 @@
         android:title="Sign Out"
         android:icon="@drawable/ic_exit_to_app_black_24dp"
         android:id="@+id/nav_signout"/>
+    <item
+        android:id="@+id/nav_update_cartype"
+        android:title="ROUTE PAYMENT"/>
+
+
 
 </menu>

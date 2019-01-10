@@ -3,7 +3,6 @@ package asliborneo.router.Service;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -26,14 +25,12 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
 import java.util.Map;
-import java.util.Objects;
-import java.util.Random;
 
-import asliborneo.router.Commons;
+import asliborneo.router.Commons.Common;
 import asliborneo.router.Model.Token;
-import asliborneo.router.NotificationHelper;
+import asliborneo.router.Helper.NotificationHelper;
 import asliborneo.router.R;
-import asliborneo.router.Rate_Driver;
+import asliborneo.router.JomRide.Rate_Driver;
 
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
@@ -63,7 +60,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     });
 
                     LocalBroadcastManager.getInstance(MyFirebaseMessagingService.this)
-                            .sendBroadcast(new Intent(Commons.CANCEL_BROADCAST));
+                            .sendBroadcast(new Intent(Common.CANCEL_BROADCAST));
 
                 } else if (title.equals("Arrived Notification")) {
                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)

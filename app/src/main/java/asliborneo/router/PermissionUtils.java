@@ -10,7 +10,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.widget.Toast;
 
-
+import asliborneo.router.JomRide.Home;
+import asliborneo.router.R;
 
 
 public abstract class PermissionUtils {

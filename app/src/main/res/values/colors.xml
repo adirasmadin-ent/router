@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#ffffff</color>
-    <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#D81B60</color>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#2f333f</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="grey_100">#F5F5F5</color>
+    <color name="grey_300">#E0E0E0</color>
     <color name="bottomtext">#00574B</color>
     <color name="navigation">@android:color/white</color>
     <color name="buttonPickupRequest">#f95aac9c</color>
-    <color name="bgMain">#765aac9c</color>
+    <color name="bgMain">#64b0c6</color>
     <color name="background_material_light">#ffffff</color>
-    <color name="primary_material_light">#f9d23a</color>
+    <color name="primary_material_light">#69865a</color>
+    <color name="home_nav">@color/buttonPickupRequest</color>
+    <color name="bluelight">#49acd5</color>
+    <color name="green">#45bc62</color>
+    <color name="orange">#eaad43</color>
 </resources>
