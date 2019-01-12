@@ -3,22 +3,22 @@
     <item android:state_pressed="true" >
         <shape android:shape="oval">
             <solid android:color="@color/colorAccent"/>
-            <size android:width="120dp" android:height="120dp"/>
+            <size android:width="80dp" android:height="80dp"/>
         </shape>
     </item>
     <item android:state_focused="true">
         <shape android:shape="oval">
             <solid android:color="@color/buttonPickupRequest"/>
-            <size android:width="100dp" android:height="100dp"/>
+            <size android:width="60dp" android:height="60dp"/>
         </shape>
     </item>
 
 
-    <item android:background="@drawable/cardisabled" >
+    <item android:background="@drawable/loading" >
 
         <shape android:shape="oval">
             <solid android:color="@color/bgMain"/>
-            <size android:width="120dp" android:height="120dp"/>
+            <size android:width="60dp" android:height="60dp"/>
         </shape>
     </item>
 </selector>

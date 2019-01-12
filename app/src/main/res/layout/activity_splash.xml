@@ -9,10 +9,10 @@
     android:paddingLeft="16dp"
     android:paddingRight="16dp"
     android:paddingTop="16dp"
-    tools:context=".SplashScreen"
+    tools:context="asliborneo.router.SplashScreen"
     >
     <com.felipecsl.gifimageview.library.GifImageView
-        android:id="@+id/givImageView"
+        android:id="@+id/gifImageView"
         android:scaleType="fitCenter"
 
         android:layout_width="match_parent"

@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.Marker;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -31,6 +32,7 @@ import retrofit2.Response;
 public class Common {
 
 public static Rider currentUser;
+
     public static double userWallet = 0.0;
     public static final String CANCEL_BROADCAST = "cancel_pickup";
     public static final String tokenTable ="Tokens";
@@ -109,6 +111,8 @@ public static Rider currentUser;
             }
         });
     }
+
+
 
 
 

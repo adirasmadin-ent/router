@@ -1,6 +1,7 @@
 package asliborneo.router.JomRide;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -17,6 +18,7 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -27,12 +29,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.RadioButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -84,6 +90,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.google.maps.android.SphericalUtil;
 import com.rengwuxian.materialedittext.MaterialEditText;
+import com.spark.submitbutton.SubmitButton;
 import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
@@ -103,6 +110,8 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import dmax.dialog.SpotsDialog;
 
 import static asliborneo.router.R.layout.activity_home;
+import static asliborneo.router.R.layout.activity_main_menu;
+import static asliborneo.router.R.layout.layout_activity_menu;
 
 
 public class Home extends AppCompatActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener, GoogleMap.OnInfoWindowClickListener, ValueEventListener {
@@ -123,7 +132,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
     Button place_pickup_request;
     NavigationView nav_view;
     AutocompleteFilter typefilter;
-
+    Button backButton;
 
     static int UPDATE_INTERVAL = 5000;
     static int FASTEST_INTERVAL = 3000;
@@ -137,7 +146,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
     boolean isTeksi = false;
 
     LocationRequest mLocationRequest;
-    Marker mUserMarker;
+
 
     FirebaseStorage storage;
     StorageReference storageReference;
@@ -153,20 +162,33 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
         }
     };
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(activity_home);
+
+        setContentView(R.layout.activity_home);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+
+
+//        setSupportActionBar(toolbar);
         SupportMapFragment MapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         assert MapFragment != null;
         MapFragment.getMapAsync(this);
-        drawer_layout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        toggle = new ActionBarDrawerToggle(
-                this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer_layout.addDrawerListener(toggle);
-        toggle.syncState();
+//        drawer_layout = (DrawerLayout) findViewById(R.id.drawer_layout);
+//        toggle = new ActionBarDrawerToggle(
+//                this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+//        drawer_layout.addDrawerListener(toggle);
+//        toggle.syncState();
+
+
+        toolbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               Home.super.finish();
+
+            }
+        });
 
         LocalBroadcastManager.getInstance(this)
                 .registerReceiver(mCancelBroadCast, new IntentFilter(Common.CANCEL_BROADCAST));
@@ -175,6 +197,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
         storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference();
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+
         navigationView.setNavigationItemSelectedListener(this);
 
         View locationButton = ((View) MapFragment.getView().findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
@@ -184,6 +207,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
         View navigationHeaderView = navigationView.getHeaderView(0);
 
         if (Common.currentUser != null) {
+
             txtRiderName = navigationHeaderView.findViewById(R.id.txtRiderName);
             txtRiderName.setText(String.format("%s", Common.currentUser.getName()));
             txtStars = navigationHeaderView.findViewById(R.id.txtStars);
@@ -235,6 +259,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
             }
         }
 
+
+
         mFCMService = Common.getFCMService();
 
         place_pickup_request = (Button) findViewById(R.id.btnpickuprequest);
@@ -263,11 +289,13 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
         });
 
         place_location = (PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.location);
-        place_location.setHint("Location");
-        place_destination = (PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.destination);
-        ((EditText) findViewById(R.id.place_autocomplete_search_input)).setTextSize(25.0f);
 
-        place_destination.setHint("Destination");
+        place_location.setHint(" location");
+
+        place_destination = (PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.destination);
+
+
+        place_destination.setHint(" destination");
         place_location.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
@@ -289,12 +317,16 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
             public void onPlaceSelected(Place place) {
 
                 mPlaceDestination = place.getAddress().toString();
+
                 destination_location_marker = mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("Destination").icon(BitmapDescriptorFactory.fromResource(R.drawable.des)));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 15.0f));
-                BottomSheetRider bottomSheetRider = BottomSheetRider.newInstance(mPlaceLocation, mPlaceDestination, false);
-                bottomSheetRider.show(getSupportFragmentManager(), bottomSheetRider.getTag());
 
-            }
+                    BottomSheetRider bottomSheetRider = BottomSheetRider.newInstance(mPlaceLocation, mPlaceDestination, false);
+                    bottomSheetRider.show(getSupportFragmentManager(), bottomSheetRider.getTag());
+                }
+
+
+
 
             @Override
             public void onError(Status status) {
@@ -313,6 +345,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
         setupLocation();
 
     }
+
+
 
     private void UpdateserverToken() {
         FirebaseDatabase db = FirebaseDatabase.getInstance();
@@ -506,6 +540,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,15.0f));
                 BottomSheetRider bottomSheetRider=BottomSheetRider.newInstance(String.format("%f,%f", mLastLocation.getLatitude(), mLastLocation.getLongitude()), String.format("%f,%f", latLng.latitude, latLng.longitude),true);
                 bottomSheetRider.show(getSupportFragmentManager(),bottomSheetRider.getTag());
+
             }
         });
         //googleMap.addMarker(ic_new MarkerOptions().title("Rider Location").position(ic_new LatLng(37.7750, -122.4183)));
@@ -916,7 +951,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
     @Override
     public void onInfoWindowClick(Marker marker) {
 
-        if (!marker.getTitle().equals("You")) {
+        if (!marker.getTitle().equals("You") && !marker.getTitle().equals(this)) {
             Intent intent = new Intent(Home.this, CallDriver.class);
             intent.putExtra("driverId", marker.getSnippet().replaceAll("\\D+", ""));
             intent.putExtra("lat", mLastLocation.getLatitude());

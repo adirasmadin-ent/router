@@ -1,7 +1,7 @@
 package asliborneo.router;
 
 import android.content.Intent;
-import android.os.Handler;
+
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ProgressBar;
@@ -23,27 +23,30 @@ public class SplashScreen extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
-        progressBar = findViewById(R.id.progressBar);
-        gifImageView = findViewById(R.id.givImageView);
-        progressBar.setVisibility(progressBar.VISIBLE);
+     gifImageView = (GifImageView) findViewById(R.id.gifImageView);
+     progressBar = (ProgressBar)findViewById(R.id.progressBar);
+     progressBar.setVisibility(progressBar.INVISIBLE);
 
-        try{
-            InputStream inputStream = getAssets().open("loading.gif");
-            byte[] bytes = IOUtils.toByteArray(inputStream);
-            gifImageView.setBytes(bytes);
-            gifImageView.startAnimation();
-        } catch (IOException ex) {
+     try {
+         InputStream inputStream = getAssets().open("loading.gif");
+         byte[] bytes = IOUtils.toByteArray(inputStream);
+         gifImageView.setBytes(bytes);
+         gifImageView.startAnimation();
+     }
+     catch (IOException ex)
+     {
+
+     }
+     new android.os.Handler().postDelayed(new Runnable() {
+         @Override
+         public void run() {
+             SplashScreen.this.startActivity(new Intent(SplashScreen.this,MainActivity.class));
+             SplashScreen.this.finish();
+         }
+     }, 4000);
 
 
-        }
 
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                SplashScreen.this.startActivity(new Intent(SplashScreen.this,MainActivity.class));
-                SplashScreen.this.finish();
-            }
-        },3000);
 
     }
 }

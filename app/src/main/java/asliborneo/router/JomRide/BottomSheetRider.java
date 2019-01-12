@@ -1,5 +1,6 @@
 package asliborneo.router.JomRide;
 
+import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialogFragment;
@@ -7,7 +8,17 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
+
+import com.firebase.geofire.GeoFire;
+import com.firebase.geofire.GeoLocation;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,6 +35,8 @@ import retrofit2.Response;
 public class BottomSheetRider extends BottomSheetDialogFragment {
     String mLocation,mDestination;
     TextView txtLocation, txtDestination,txtDistance;
+
+
     static boolean Tap_on_map;
     IGoogleMAPApi mService;
     public static  BottomSheetRider newInstance(String location,String destination,boolean Tap_on_map){
@@ -48,12 +61,16 @@ public class BottomSheetRider extends BottomSheetDialogFragment {
         Tap_on_map=getArguments().getBoolean("Tap_on_map");
     }
 
+
+
     @Override
     public View onCreateView(@Nullable LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v=inflater.inflate(R.layout.bottom_sheet_rider,container,false);
         txtLocation = (TextView) v.findViewById(R.id.location);
         txtDestination = (TextView) v.findViewById(R.id.destination);
         txtDistance=(TextView) v.findViewById(R.id.distance);
+
+
         getPrice(mLocation,mDestination);
         if (!Tap_on_map) {
             txtLocation.setText(mLocation);
