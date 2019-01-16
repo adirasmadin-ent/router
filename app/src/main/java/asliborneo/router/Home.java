@@ -1,44 +1,43 @@
-package asliborneo.router.JomRide;
+package asliborneo.router;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.location.Location;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
-import android.support.design.widget.NavigationView;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.TextUtils;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
-import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.location.Location;
+import android.support.annotation.NonNull;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.PopupWindow;
 import android.widget.RadioButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -90,7 +89,6 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.google.maps.android.SphericalUtil;
 import com.rengwuxian.materialedittext.MaterialEditText;
-import com.spark.submitbutton.SubmitButton;
 import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
@@ -99,22 +97,22 @@ import java.util.UUID;
 
 import asliborneo.router.Commons.Common;
 import asliborneo.router.Helper.Custom_Info_Window;
-import asliborneo.router.MainActivity;
+import asliborneo.router.JomRide.BottomSheetRider;
+import asliborneo.router.JomRide.CallDriver;
 import asliborneo.router.Model.Rider;
 import asliborneo.router.Model.Token;
 import asliborneo.router.PayServices.CheckoutActivity;
-import asliborneo.router.PermissionUtils;
-import asliborneo.router.R;
+
 import asliborneo.router.Service.IFCMService;
 import de.hdodenhof.circleimageview.CircleImageView;
+
+
 import dmax.dialog.SpotsDialog;
 
-import static asliborneo.router.R.layout.activity_home;
-import static asliborneo.router.R.layout.activity_main_menu;
-import static asliborneo.router.R.layout.layout_activity_menu;
+public class Home extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener,OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener, ValueEventListener,GoogleMap.OnMapClickListener {
 
 
-public class Home extends AppCompatActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener, GoogleMap.OnInfoWindowClickListener, ValueEventListener {
     private static final int MY_PERMISSION_REQUEST_CODE = 1;
     private static final int PLAY_SERVICE_RESOLUTION_REQUEST = 10;
     Toolbar toolbar;
@@ -132,7 +130,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
     Button place_pickup_request;
     NavigationView nav_view;
     AutocompleteFilter typefilter;
-    Button backButton;
+    boolean isButtonClicked = false;
+    View mapView;
 
     static int UPDATE_INTERVAL = 5000;
     static int FASTEST_INTERVAL = 3000;
@@ -144,10 +143,12 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
     TextView txtRiderName, txtStars;
     ImageView teksiEnabled, teksi_disabled;
     boolean isTeksi = false;
+    Button pin;
+    private Menu menu;
 
     LocationRequest mLocationRequest;
 
-
+    ImageView btnBack;
     FirebaseStorage storage;
     StorageReference storageReference;
     int radius = 1;
@@ -161,31 +162,25 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
             place_pickup_request.setText("REQUEST PICK UP");
         }
     };
-
-    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_home);
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-
-
-//        setSupportActionBar(toolbar);
         SupportMapFragment MapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         assert MapFragment != null;
+
         MapFragment.getMapAsync(this);
-//        drawer_layout = (DrawerLayout) findViewById(R.id.drawer_layout);
-//        toggle = new ActionBarDrawerToggle(
-//                this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-//        drawer_layout.addDrawerListener(toggle);
-//        toggle.syncState();
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (mapView !=null)
+        mapView = MapFragment.getView();
 
 
-        toolbar.setOnClickListener(new View.OnClickListener() {
+        btnBack = findViewById(R.id.backBtn);
+        btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               Home.super.finish();
+                Home.super.finish();
 
             }
         });
@@ -193,15 +188,29 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
         LocalBroadcastManager.getInstance(this)
                 .registerReceiver(mCancelBroadCast, new IntentFilter(Common.CANCEL_BROADCAST));
 
-
+        Drawable drawable = ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_shopping_cart_black_24dp);
+        toolbar.setOverflowIcon(drawable);
         storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference();
+
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.pin);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-
         navigationView.setNavigationItemSelectedListener(this);
-
-        View locationButton = ((View) MapFragment.getView().findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
-        RelativeLayout.LayoutParams rlp = (RelativeLayout.LayoutParams) locationButton.getLayoutParams();
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         View navigationHeaderView = navigationView.getHeaderView(0);
@@ -301,7 +310,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
             public void onPlaceSelected(Place place) {
                 mMap.clear();
                 mPlaceLocation = place.getAddress().toString();
-                mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("Pin Location").icon(BitmapDescriptorFactory.fromResource(R.drawable.loc)));
+             destination_location_marker=   mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("Pin Location").icon(BitmapDescriptorFactory.fromResource(R.drawable.style_circular_button)));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 15.0f));
 
             }
@@ -318,12 +327,12 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
 
                 mPlaceDestination = place.getAddress().toString();
 
-                destination_location_marker = mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("Destination").icon(BitmapDescriptorFactory.fromResource(R.drawable.des)));
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 15.0f));
+              mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("Destination"));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 17.0f));
 
-                    BottomSheetRider bottomSheetRider = BottomSheetRider.newInstance(mPlaceLocation, mPlaceDestination, false);
-                    bottomSheetRider.show(getSupportFragmentManager(), bottomSheetRider.getTag());
-                }
+                BottomSheetRider bottomSheetRider = BottomSheetRider.newInstance(mPlaceLocation, mPlaceDestination, false);
+                bottomSheetRider.show(getSupportFragmentManager(), bottomSheetRider.getTag());
+            }
 
 
 
@@ -343,7 +352,6 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
 
         UpdateserverToken();
         setupLocation();
-
     }
 
 
@@ -424,7 +432,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
             buildLocationRequest();
             buildLocationCallback();
             displayLocation();
-            enableMyLocation();
+           enableMyLocation();
         }
     }
 
@@ -452,6 +460,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
                 mcurrent = mMap.addMarker(new MarkerOptions().title("Pick Up Here").position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())).snippet("").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
                 mcurrent.showInfoWindow();
                 place_pickup_request.setText("Getting Driver");
+
                 find_driver();
             }
         });
@@ -470,6 +479,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
                     Common.isDriverFound = true;
                     Common.driverId = key;
                     place_pickup_request.setText("Call Driver");
+
                 }
             }
 
@@ -492,6 +502,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
                     if (!Common.isDriverFound) {
                         Toast.makeText(Home.this, "No Drivers available around", Toast.LENGTH_LONG).show();
                         place_pickup_request.setText("Request Pickup");
+
                         geoQuery.removeAllListeners();
                     }
                 }
@@ -527,17 +538,34 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
 
             return;
         }
+
         mMap.setMyLocationEnabled(true);
-        enableMyLocation();
+            enableMyLocation();
+
+        if (mapView != null &&
+                mapView.findViewById(Integer.parseInt("1")) != null) {
+            // Get the button view
+            View locationButton = ((View) mapView.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
+            // and next place it, on bottom right (as Google Maps app)
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)
+                    locationButton.getLayoutParams();
+            // position on right bottom
+            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
+            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+            layoutParams.setMargins(0, 0, 420, 420);}
         mMap.getUiSettings().setCompassEnabled(true);
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onMapClick(LatLng latLng) {
                 if (place_location !=null && place_destination !=null)
+
+
                     if(destination_location_marker !=null)
                         destination_location_marker.remove();
-                destination_location_marker=mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.des)).title("Destination").position(latLng));
+              mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.des)).title("Destination").position(latLng));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,15.0f));
+
                 BottomSheetRider bottomSheetRider=BottomSheetRider.newInstance(String.format("%f,%f", mLastLocation.getLatitude(), mLastLocation.getLongitude()), String.format("%f,%f", latLng.latitude, latLng.longitude),true);
                 bottomSheetRider.show(getSupportFragmentManager(),bottomSheetRider.getTag());
 
@@ -569,13 +597,9 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
         final RadioButton defaultCar= carType.findViewById(R.id.default_cartype);
         final RadioButton teksiDriver= carType.findViewById(R.id.teksi_cartype);
 
-        if (Common.currentUser.getCarType() == "NON MEMBERSHIP")
-        {
-            //
-        }
-
-            if(Common.currentUser !=null)
-                if (Common.currentUser.getCarType().equals("MONTHLY SUBSCRIPTION ( RM300 )"))
+  
+        if(Common.currentUser !=null)
+            if (Common.currentUser.getCarType().equals("MONTHLY SUBSCRIPTION ( RM300 )"))
                 defaultCar.setChecked(true);
 
             else
@@ -757,9 +781,67 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
 
 
 
+
     @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.home, menu);
+        return true;
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
         int id = item.getItemId();
+        if (id == R.id.nav_orders) {
+            return true;
+        }
+        if (id == R.id.nav_cart) {
+            return true;
+        }
+        if (id == R.id.nav_menu) {
+
+            return true;
+        }
+        else if (id ==R.id.action_settings) {
+            menu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_offline));
+            menu.getItem(0).setTitle("Offline");
+            menu.getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_online));
+            menu.getItem(1).setTitle("Online");
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+
+
+
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_menu) {
+            // Handle the camera action
+        } else if (id == R.id.nav_cart) {
+
+        } else if (id ==R.id.nav_orders) {
+
+        } else if (id == R.id.nav_backjomeat) {
+            finish();
+        }
         if (item.getItemId() == R.id.nav_signout) {
             Sign_Out();
 
@@ -773,8 +855,9 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
         }
 
 
-
-        return false;
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 
     private void showUpdateInformationDialog() {
@@ -975,5 +1058,16 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Navig
     protected void onDestroy() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mCancelBroadCast);
         super.onDestroy();
+    }
+
+    @Override
+    public void onMapClick(LatLng latLng) {
+        pin = findViewById(R.id.pin);
+        pin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
     }
 }
