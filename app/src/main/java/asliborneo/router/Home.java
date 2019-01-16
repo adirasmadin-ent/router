@@ -110,7 +110,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import dmax.dialog.SpotsDialog;
 
 public class Home extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener,OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener, ValueEventListener,GoogleMap.OnMapClickListener {
+        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener, ValueEventListener, GoogleMap.OnMapClickListener {
 
 
     private static final int MY_PERMISSION_REQUEST_CODE = 1;
@@ -162,18 +162,20 @@ public class Home extends AppCompatActivity
             place_pickup_request.setText("REQUEST PICK UP");
         }
     };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
         SupportMapFragment MapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        assert MapFragment != null;
-
+        mapView = MapFragment.getView();
         MapFragment.getMapAsync(this);
+
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        if (mapView !=null)
-        mapView = MapFragment.getView();
+
+
 
 
         btnBack = findViewById(R.id.backBtn);
@@ -269,7 +271,6 @@ public class Home extends AppCompatActivity
         }
 
 
-
         mFCMService = Common.getFCMService();
 
         place_pickup_request = (Button) findViewById(R.id.btnpickuprequest);
@@ -310,7 +311,7 @@ public class Home extends AppCompatActivity
             public void onPlaceSelected(Place place) {
                 mMap.clear();
                 mPlaceLocation = place.getAddress().toString();
-             destination_location_marker=   mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("Pin Location").icon(BitmapDescriptorFactory.fromResource(R.drawable.style_circular_button)));
+                destination_location_marker = mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("Pin Location").icon(BitmapDescriptorFactory.fromResource(R.drawable.style_circular_button)));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 15.0f));
 
             }
@@ -327,14 +328,12 @@ public class Home extends AppCompatActivity
 
                 mPlaceDestination = place.getAddress().toString();
 
-              mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("Destination"));
+                mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("Destination"));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 17.0f));
 
                 BottomSheetRider bottomSheetRider = BottomSheetRider.newInstance(mPlaceLocation, mPlaceDestination, false);
                 bottomSheetRider.show(getSupportFragmentManager(), bottomSheetRider.getTag());
             }
-
-
 
 
             @Override
@@ -353,7 +352,6 @@ public class Home extends AppCompatActivity
         UpdateserverToken();
         setupLocation();
     }
-
 
 
     private void UpdateserverToken() {
@@ -432,7 +430,7 @@ public class Home extends AppCompatActivity
             buildLocationRequest();
             buildLocationCallback();
             displayLocation();
-           enableMyLocation();
+            enableMyLocation();
         }
     }
 
@@ -520,6 +518,31 @@ public class Home extends AppCompatActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        mMap.setMyLocationEnabled(true);
+        enableMyLocation();
+
+        if (mapView != null &&
+                mapView.findViewById(Integer.parseInt("1")) != null) {
+            // Get the button view
+            View locationButton = ((View) mapView.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
+            // and next place it, on bottom right (as Google Maps app)
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)
+                    locationButton.getLayoutParams();
+            // position on right bottom
+            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
+            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+            layoutParams.setMargins(0, 0, 420, 420);}
         try {
             boolean issucess = mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(Home.this, R.raw.mymapstyle));
             if (!issucess)
@@ -539,20 +562,7 @@ public class Home extends AppCompatActivity
             return;
         }
 
-        mMap.setMyLocationEnabled(true);
-            enableMyLocation();
 
-        if (mapView != null &&
-                mapView.findViewById(Integer.parseInt("1")) != null) {
-            // Get the button view
-            View locationButton = ((View) mapView.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
-            // and next place it, on bottom right (as Google Maps app)
-            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)
-                    locationButton.getLayoutParams();
-            // position on right bottom
-            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
-            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-            layoutParams.setMargins(0, 0, 420, 420);}
         mMap.getUiSettings().setCompassEnabled(true);
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.N)
@@ -580,7 +590,7 @@ public class Home extends AppCompatActivity
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             // Permission to access the location is missing.
-            PermissionUtils.requestPermission(this, MY_PERMISSION_REQUEST_CODE,
+            PermissionUtils.requestPermission(Home.this, MY_PERMISSION_REQUEST_CODE,
                     Manifest.permission.ACCESS_FINE_LOCATION, true);
         } else if (mMap != null) {
             // Access to the location has been granted to the app.
@@ -597,7 +607,7 @@ public class Home extends AppCompatActivity
         final RadioButton defaultCar= carType.findViewById(R.id.default_cartype);
         final RadioButton teksiDriver= carType.findViewById(R.id.teksi_cartype);
 
-  
+
         if(Common.currentUser !=null)
             if (Common.currentUser.getCarType().equals("MONTHLY SUBSCRIPTION ( RM300 )"))
                 defaultCar.setChecked(true);
