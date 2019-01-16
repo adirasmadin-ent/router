@@ -1,8 +1,8 @@
 <resources>
-    <string name="app_name">ROUTE </string>
+    <string name="app_name"> </string>
     <string name="google_browser_api">AIzaSyClpfgiCLOlgB9ZxnSLm6vaUj4bVyAmoWA</string>
     <string name="title_activity_home">Home</string>
-    <string name="title_home">Home</string>
+    <string name="title_home"></string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
     <string name="title_activity_rate__driver">Rate Driver</string>

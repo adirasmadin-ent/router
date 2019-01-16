@@ -6,7 +6,7 @@
     <color name="grey_100">#F5F5F5</color>
     <color name="grey_300">#E0E0E0</color>
     <color name="bottomtext">#00574B</color>
-    <color name="navigation">@android:color/white</color>
+    <color name="navigation">@color/common_google_signin_btn_text_dark_focused</color>
     <color name="buttonPickupRequest">#f95aac9c</color>
     <color name="bgMain">#64b0c6</color>
     <color name="background_material_light">#ffffff</color>
@@ -15,4 +15,9 @@
     <color name="bluelight">#49acd5</color>
     <color name="green">#45bc62</color>
     <color name="orange">#eaad43</color>
+    <color name="overlayBackground">#7f333639</color>
+    <color name="overlayActionBar">#0e0d0e</color>
+    <color name="background">#ffffff</color>
+    <color name="red">#d12c2c</color>
+    <color name="primary_dark_material_dark">#ffffff</color>
 </resources>

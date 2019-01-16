@@ -3,207 +3,218 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".JomRide.Home">
-
-    <include layout="@layout/content_home" />
-
-
-
-<android.support.v7.widget.CardView
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginBottom="40dp"
-
-    android:outlineSpotShadowColor="@color/bluelight"
-    android:layout_marginRight="20dp"
-    android:layout_marginTop="40dp"
-    android:layout_marginLeft="20dp"
-    app:cardCornerRadius="15dp"
-    app:cardElevation="10dp"
-    android:layout_alignParentBottom="true">
-
-
-
-
-
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    tools:context=".Home">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:weightSum="2"
-        android:padding="20dp"
-        android:orientation="horizontal"
-        android:layout_marginRight="20dp"
-        android:layout_marginLeft="20dp"
-        >
-        <android.support.v7.widget.CardView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="10dp"
-            android:orientation="horizontal"
-            app:cardElevation="10dp"
-            app:cardCornerRadius="30dp"
-            android:layout_gravity="center">
-
-            <Button
-                android:layout_below="@+id/select_car_group"
-                android:layout_weight="1"
-
-                android:gravity="center"
-                android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true"
-
-
-
-                android:textColor="#FFFFFF"
-                android:textSize="12sp"
-
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/style_circular_button"
-                android:shadowColor="#A8A8A8"
-                android:shadowDx="0"
-
-                android:shadowDy="0"
-                android:shadowRadius="5"
-                android:text="PICKUP REQUEST"
-                android:id="@+id/btnpickuprequest"
-                />
-
-        </android.support.v7.widget.CardView>
-
-
-        <android.support.v7.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_weight="2"
-            android:layout_height="wrap_content"
-
-            android:layout_rowWeight="2"
-        >
-        <android.support.v7.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            app:cardElevation="10dp"
-            app:cardCornerRadius="15dp">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-
-                android:orientation="horizontal">
-                <ImageView
-
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:src="@drawable/pin"
-
-                    />
-                <fragment
-                    android:id="@+id/location"
-                    android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
-                    android:layout_width="0dp"
-
-                    android:layout_height="wrap_content"
-                    android:layout_weight="5"
-                    tools:context="asliborneo.router.JomRide.Home"
-                    tools:layout="@layout/app_bar_home" />
-
-            </LinearLayout>
-
-
-
-        </android.support.v7.widget.CardView>
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-
-            android:background="@color/buttonPickupRequest"/>
-        <android.support.v7.widget.CardView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            app:cardElevation="10dp"
-            android:layout_marginLeft="10dp"
-            app:cardCornerRadius="15dp">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:weightSum="6"
-                android:orientation="horizontal">
-                <ImageView
-
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:src="@drawable/des"
-
-                    />
-                <fragment
-                    android:id="@+id/destination"
-                    android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
-                    android:layout_width="0dp"
-
-                    android:layout_height="wrap_content"
-                    android:layout_weight="5"
-                    tools:context="asliborneo.router.JomRide.Home"
-                    tools:layout="@layout/app_bar_home" />
-
-            </LinearLayout>
-
-
-
-        </android.support.v7.widget.CardView></android.support.v7.widget.CardView>
-
-
-
-
-
-
-
-    </LinearLayout>
-
-</android.support.v7.widget.CardView>
-
-
-
-        <!--navigation top view-->
-
-
-
-
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-
-        android:background="@drawable/ic_touch"
-        app:popupTheme="@style/Theme.AppCompat.Light.NoActionBar" />
-
-    <android.support.design.widget.AppBarLayout
-        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
         android:layout_alignParentTop="true"
-        android:weightSum="4"
-        android:background="@android:color/white"
-        android:layout_gravity="top"
-        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        android:gravity="left">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/ic_my_location_black_24dp"/>
+    </LinearLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <fragment
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:context=".Home"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="40dp">
+            <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="40dp"
+
+                android:outlineSpotShadowColor="@color/bluelight"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="40dp"
+                android:layout_marginLeft="20dp"
+                app:cardCornerRadius="15dp"
+                app:cardElevation="10dp"
+                android:layout_alignParentBottom="true">
+
+                <!--<ImageButton-->
+                <!--android:id="@+id/backBtn"-->
+                <!--android:layout_width="50dp"-->
+                <!--android:layout_height="50dp"-->
+                <!--android:layout_gravity="top"-->
+                <!--android:background="@drawable/ic_arrow_drop_down_circle_black_24dp" />-->
 
 
+                <ImageView
+                    android:id="@+id/backBtn"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="top"
+
+                    android:background="@drawable/ic_arrow_drop_down_circle_black_24dp" />
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:weightSum="2"
+                    android:padding="20dp"
+                    android:orientation="horizontal"
+                    android:layout_marginRight="20dp"
+                    android:layout_marginLeft="20dp"
+                    >
+                    <android.support.v7.widget.CardView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal"
+                        app:cardElevation="10dp"
+                        app:cardCornerRadius="30dp"
+                        android:layout_gravity="center">
+
+                        <Button
+                            android:layout_below="@+id/select_car_group"
+                            android:layout_weight="1"
+
+                            android:gravity="center"
+                            android:layout_centerHorizontal="true"
+                            android:layout_centerVertical="true"
+
+
+
+                            android:textColor="#FFFFFF"
+                            android:textSize="12sp"
+
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/style_circular_button"
+                            android:shadowColor="#A8A8A8"
+                            android:shadowDx="0"
+
+                            android:shadowDy="0"
+                            android:shadowRadius="5"
+                            android:text="PICKUP REQUEST"
+                            android:id="@+id/btnpickuprequest"
+                            />
+
+                    </android.support.v7.widget.CardView>
+
+
+                    <android.support.v7.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_weight="2"
+                        android:layout_height="wrap_content"
+
+                        android:layout_rowWeight="2"
+                        >
+                        <android.support.v7.widget.CardView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="10dp"
+                            app:cardElevation="10dp"
+                            app:cardCornerRadius="15dp">
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+
+                                android:orientation="horizontal">
+                                <ImageView
+
+                                    android:layout_width="0dp"
+                                    android:layout_height="match_parent"
+                                    android:layout_gravity="center_vertical"
+                                    android:layout_weight="1"
+                                    android:src="@drawable/pin"
+
+                                    />
+                                <fragment
+                                    android:id="@+id/location"
+                                    android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
+                                    android:layout_width="0dp"
+
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="5"
+                                    tools:context="asliborneo.router.Home"
+                                    tools:layout="@layout/app_bar_home" />
+
+                            </LinearLayout>
+
+
+
+                        </android.support.v7.widget.CardView>
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="2dp"
+                            android:layout_marginTop="10dp"
+                            android:layout_marginBottom="10dp"
+                            android:layout_marginLeft="16dp"
+                            android:layout_marginRight="16dp"
+
+                            android:background="@color/buttonPickupRequest"/>
+                        <android.support.v7.widget.CardView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="30dp"
+                            app:cardElevation="10dp"
+                            android:layout_marginLeft="10dp"
+                            app:cardCornerRadius="15dp">
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:weightSum="6"
+                                android:orientation="horizontal">
+                                <ImageView
+
+                                    android:layout_width="0dp"
+                                    android:layout_height="match_parent"
+                                    android:layout_gravity="center_vertical"
+                                    android:layout_weight="1"
+                                    android:src="@drawable/des"
+
+                                    />
+                                <fragment
+                                    android:id="@+id/destination"
+                                    android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
+                                    android:layout_width="0dp"
+
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="5"
+                                    tools:context="asliborneo.router.Home"
+                                    tools:layout="@layout/app_bar_home" />
+
+                            </LinearLayout>
+
+
+
+                        </android.support.v7.widget.CardView></android.support.v7.widget.CardView>
+
+
+
+
+
+
+
+                </LinearLayout>
+
+            </android.support.v7.widget.CardView>
+
+        </LinearLayout>
         <android.support.v7.widget.CardView
             android:layout_marginTop="50dp"
             android:layout_marginBottom="0dp"
             android:gravity="top"
-            android:id="@+id/select_car_group"
+
             android:orientation="horizontal"
             android:weightSum="4"
             android:layout_weight="4"
@@ -261,8 +272,66 @@
 
 
         </android.support.v7.widget.CardView>
+    </RelativeLayout>
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/pin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginBottom="20dp"
+
+        android:shadowColor="#A8A8A8"
+        app:backgroundTint="@color/white"
+        app:srcCompat="@drawable/style_circular_button"
+        />
+
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:weightSum="4"
+        android:background="@android:color/white"
+        android:layout_gravity="left"
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+
+            app:popupTheme="@style/Theme.AppCompat.Light.NoActionBar" />
+        <android.support.v7.widget.CardView
+
+            android:layout_marginBottom="0dp"
+            android:gravity="top"
+            android:id="@+id/select_car_group"
+            android:orientation="horizontal"
+
+            app:cardElevation="10dp"
+            app:cardCornerRadius="15dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+
+
+
+
+
+
+        </android.support.v7.widget.CardView>
+
+
 
     </android.support.design.widget.AppBarLayout>
+
+
+
+
+    <!--navigation top view-->
+
+
 
 
 

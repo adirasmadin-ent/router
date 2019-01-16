@@ -1,22 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-
     tools:showIn="navigation_view">
 
+    <group android:checkableBehavior="single">
+        <item
+            android:title="Update Information"
+            android:icon="@drawable/ic_event_note_black_24dp"
+            android:id="@+id/nav_updateInformation"/>
 
-    <item
-        android:title="Update Information"
-        android:icon="@drawable/ic_event_note_black_24dp"
-        android:id="@+id/nav_updateInformation"/>
+        <item
+            android:title="Sign Out"
+            android:icon="@drawable/ic_exit_to_app_black_24dp"
+            android:id="@+id/nav_signout"/>
+        <item
+            android:id="@+id/nav_update_cartype"
+            android:title="ROUTE PAYMENT"/>
 
-    <item
-        android:title="Sign Out"
-        android:icon="@drawable/ic_exit_to_app_black_24dp"
-        android:id="@+id/nav_signout"/>
-    <item
-        android:id="@+id/nav_update_cartype"
-        android:title="ROUTE PAYMENT"/>
+        <item
+            android:id="@+id/nav_menu"
+            android:icon="@drawable/ic_restaurant_black_24dp"
+            android:iconTint="@android:color/white"
+            android:title="Menu" />
+
+        <item
+            android:id="@+id/nav_cart"
+            android:icon="@drawable/ic_shopping_cart_black_24dp"
+            android:iconTint="@android:color/white"
+            android:title="Cart" />
+
+        <item
+            android:id="@+id/nav_orders"
+            android:icon="@drawable/ic_border_color_black_24dp"
+            android:iconTint="@android:color/white"
+            android:title="Make Orders" />
+
+        <item
+            android:id="@+id/nav_backjomeat"
+            android:icon="@drawable/ic_arrow_drop_down_circle_black_24dp"
+            android:iconTint="@android:color/white"
+            android:title="Back" />
+
+    </group>
 
 
 

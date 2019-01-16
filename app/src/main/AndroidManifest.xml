@@ -86,8 +86,8 @@
             android:name=".JomRide.Rate_Driver"
             android:label="@string/title_activity_rate__driver" />
         <activity
-            android:name=".JomRide.Home"
-            android:label="@string/title_activity_home"
+            android:name=".Home"
+
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".PayServices.CheckoutActivity" />
         <activity android:name=".JomRide.CallDriver" />

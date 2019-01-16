@@ -64,7 +64,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-places:16.0.0'
     implementation 'com.google.android.gms:play-services-auth:16.0.1'
     implementation 'com.google.maps.android:android-maps-utils:0.5'
-    implementation 'io.paperdb:paperdb:2.6'
+
     implementation 'com.android.support:support-vector-drawable:28.0.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
@@ -78,6 +78,8 @@ dependencies {
     implementation 'me.spark:submitbutton:1.0.1'
     implementation 'com.felipecsl:gifimageview:2.1.0'
     implementation 'commons-io:commons-io:2.4'
+    implementation 'info.hoang8f:fbutton:1.0.5'
+    implementation 'com.firebaseui:firebase-ui-database:1.2.0'
 
 }
 apply plugin: 'com.google.gms.google-services'

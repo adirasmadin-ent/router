@@ -23,7 +23,7 @@
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
             android:gravity="top"
-            android:background="@color/colorPrimaryDark"
+            android:background="@color/red"
             android:orientation="vertical"
             android:paddingLeft="@dimen/activity_horizontal_margin"
             android:paddingTop="@dimen/activity_vertical_margin"
@@ -36,8 +36,8 @@
                 android:id="@+id/imageAvatar"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
-                app:civ_border_width="2dp"
-                app:civ_border_color="@android:color/holo_green_light"
+                app:civ_border_width="1dp"
+
                 android:paddingTop="16dp"
 
                 android:src="@drawable/profile"
@@ -87,7 +87,7 @@
                         android:layout_gravity="right"
                         android:textSize="20dp"
                         android:textColor="@android:color/white"
-                        android:layout_marginBottom="0dp"
+                        android:layout_marginBottom="20dp"
                         android:text="BAL : RM0.00"/>
             </LinearLayout>
 
@@ -98,7 +98,7 @@
         android:layout_weight="8"
         android:columnCount="2"
         android:rowCount="3"
-        android:alignmentMode="alignMargins"
+
         android:columnOrderPreserved="false"
         android:padding="14dp"
         android:background="@drawable/download"
@@ -111,15 +111,18 @@
             android:layout_height="0dp"
             android:layout_columnWeight="1"
             android:layout_marginBottom="16dp"
+
             android:layout_rowWeight="1"
             android:layout_marginLeft="16dp"
+
             android:layout_marginRight="16dp">
 
             <LinearLayout
                 android:layout_gravity="center_horizontal|center_vertical"
                 android:layout_margin="1dp"
                 android:orientation="vertical"
-                android:layout_width="match_parent"
+                android:background="@drawable/style_circular_button"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 >
                 <ImageView
@@ -151,7 +154,8 @@
                 android:layout_gravity="center_horizontal|center_vertical"
                 android:layout_margin="1dp"
                 android:orientation="vertical"
-                android:layout_width="match_parent"
+                android:background="@drawable/style_circular_button"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 >
                 <ImageView
