@@ -20,4 +20,5 @@
     <color name="background">#ffffff</color>
     <color name="red">#d12c2c</color>
     <color name="primary_dark_material_dark">#ffffff</color>
+    <color name="blue">#3F51B5</color>
 </resources>
