@@ -15,7 +15,8 @@
             android:id="@+id/nav_signout"/>
         <item
             android:id="@+id/nav_update_cartype"
-            android:title="ROUTE PAYMENT"/>
+            android:icon="@drawable/ic_monetization_on_black_24dp"
+            android:title="Route Payment"/>
 
         <item
             android:id="@+id/nav_menu"
@@ -37,7 +38,7 @@
 
         <item
             android:id="@+id/nav_backjomeat"
-            android:icon="@drawable/ic_arrow_drop_down_circle_black_24dp"
+            android:icon="@drawable/ic_arrow_back_white"
             android:iconTint="@android:color/white"
             android:title="Back" />
 

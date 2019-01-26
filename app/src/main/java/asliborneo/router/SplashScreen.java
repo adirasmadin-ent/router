@@ -22,31 +22,33 @@ public class SplashScreen extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
+//
+//     gifImageView = (GifImageView) findViewById(R.id.gifImageView);
+        progressBar = (ProgressBar)findViewById(R.id.progressBar);
+        progressBar.setVisibility(progressBar.VISIBLE);
 
-     gifImageView = (GifImageView) findViewById(R.id.gifImageView);
-     progressBar = (ProgressBar)findViewById(R.id.progressBar);
-     progressBar.setVisibility(progressBar.INVISIBLE);
+//     try {
+//         InputStream inputStream = getAssets().open("logo.gif");
+//         byte[] bytes = IOUtils.toByteArray(inputStream);
+//         gifImageView.setBytes(bytes);
+//         gifImageView.startAnimation();
+//     }
+//     catch (IOException ex)
+//     {
+//
+//     }
+//     new android.os.Handler().postDelayed(new Runnable() {
+//         @Override
+//         public void run() {
+//             SplashScreen.this.startActivity(new Intent(SplashScreen.this,MainActivity.class));
+//             SplashScreen.this.finish();
+//         }
+//     }, 4000);
+//
+//
 
-     try {
-         InputStream inputStream = getAssets().open("loading.gif");
-         byte[] bytes = IOUtils.toByteArray(inputStream);
-         gifImageView.setBytes(bytes);
-         gifImageView.startAnimation();
-     }
-     catch (IOException ex)
-     {
-
-     }
-     new android.os.Handler().postDelayed(new Runnable() {
-         @Override
-         public void run() {
-             SplashScreen.this.startActivity(new Intent(SplashScreen.this,MainActivity.class));
-             SplashScreen.this.finish();
-         }
-     }, 4000);
-
-
-
-
+        Intent intent = new Intent(this,MainActivity.class);
+        startActivity(intent);
+        finish();
     }
 }

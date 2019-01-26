@@ -10,7 +10,15 @@
 
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".MainActivity">
-
+    <com.google.android.gms.ads.AdView
+        android:id="@+id/adView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentTop="true"
+        ads:adSize="BANNER"
+        ads:adUnitId="@string/banner_ad_unit_id">
+    </com.google.android.gms.ads.AdView>
 
     <RelativeLayout
         android:layout_width="wrap_content"
@@ -22,91 +30,101 @@
 
         tools:context=".MainActivity">
 
-        <asliborneo.router.Utils.GifImageView
-            android:id="@+id/GifImageView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <!--<asliborneo.router.Utils.GifImageView-->
+            <!--android:id="@+id/GifImageView"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
 
-            android:layout_centerHorizontal="true" />
+            <!--android:layout_centerHorizontal="true" />-->
 
     </RelativeLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <!--<LinearLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentBottom="true"-->
+
+        <!--android:layout_gravity="bottom"-->
+
+        <!--android:layout_marginBottom="50dp"-->
+        <!--android:orientation="horizontal">-->
+
+        <!--<info.hoang8f.widget.FButton-->
+            <!--android:layout_gravity="center_horizontal"-->
+            <!--android:id="@+id/btnContinue"-->
+            <!--android:layout_weight="1"-->
+            <!--android:layout_marginRight="30dp"-->
+            <!--android:layout_marginLeft="30dp"-->
+
+
+
+
+            <!--android:textColor="#FFFFFF"-->
+            <!--android:textSize="22sp"-->
+
+
+            <!--android:layout_height="match_parent"-->
+            <!--android:background="@drawable/button_shape"-->
+
+
+            <!--android:shadowRadius="5"-->
+            <!--android:text="C O N T I N U E"-->
+            <!--android:layout_width="wrap_content" /></LinearLayout>-->
+
+
+
+
+    <GridLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:rowCount="1"
+        android:columnCount="2"
 
-        android:layout_gravity="bottom"
-
-        android:layout_marginBottom="50dp"
+        android:layout_centerHorizontal="true"
         android:orientation="horizontal">
-
-        <info.hoang8f.widget.FButton
-            android:layout_gravity="center_horizontal"
-            android:id="@+id/btnContinue"
-            android:layout_weight="1"
-            android:layout_marginRight="30dp"
-            android:layout_marginLeft="30dp"
-
-
-
-
-            android:textColor="#FFFFFF"
-            android:textSize="22sp"
-
-
-            android:layout_height="match_parent"
-            android:background="@drawable/button_shape"
-
-
-            android:shadowRadius="5"
-            android:text="C O N T I N U E"
-            android:layout_width="wrap_content" /></LinearLayout>
-
-
-
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-
-
-        android:gravity="center"
-        android:orientation="vertical">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="200dp"
-            android:text="R O U T E"
+            android:text="r o u t e"
             android:textAlignment="center"
-            android:textColor="@color/orange"
+            android:textColor="@color/blue"
             android:textSize="40sp" />
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:text="J O M   R I D E  B O R N E O"
-
+            android:layout_marginTop="200dp"
+            android:text=" MY"
             android:textAlignment="center"
-            android:textColor="@color/colorPrimaryDark"
-            android:textSize="16sp" />
+            android:textColor="@color/red"
+            android:textSize="40sp" />
 
 
-    </LinearLayout>
+
+
+    </GridLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:text="J O M   R I D E"
+
+         android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/orange"
+        android:textSize="16sp" />
+
 
     <TextView
         android:id="@+id/txtUrl"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="10dp"
-        android:text="(c) all copyrights reserved by asliborneo"
-        android:textAlignment="center"
-        android:textColor="@color/primary_material_light"
-        android:textSize="12sp"
-        android:textStyle="bold" />
+        android:text="w w w . r o u t e . m y "
 
+        android:textColor="@color/black"
+        android:textSize="12sp"
+        android:textStyle="italic" />
 </RelativeLayout>

@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#2f333f</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorPrimary">#4285F4</color>
+    <color name="colorPrimaryDark">#3367D6</color>
+    <color name="colorAccent">#F4B400</color>
     <color name="grey_100">#F5F5F5</color>
     <color name="grey_300">#E0E0E0</color>
     <color name="bottomtext">#00574B</color>
     <color name="navigation">@color/common_google_signin_btn_text_dark_focused</color>
-    <color name="buttonPickupRequest">#f95aac9c</color>
+    <color name="buttonPickupRequest">#f9ffffff</color>
     <color name="bgMain">#64b0c6</color>
     <color name="background_material_light">#ffffff</color>
-    <color name="primary_material_light">#69865a</color>
+    <color name="primary_material_light">#f62aadff</color>
     <color name="home_nav">@color/buttonPickupRequest</color>
     <color name="bluelight">#49acd5</color>
     <color name="green">#45bc62</color>
@@ -21,4 +21,5 @@
     <color name="red">#d12c2c</color>
     <color name="primary_dark_material_dark">#ffffff</color>
     <color name="blue">#3F51B5</color>
+    <color name="greySecondary">#8B000000</color>
 </resources>

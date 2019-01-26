@@ -17,6 +17,7 @@
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:clickable="true"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:focusable="true"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -44,5 +45,5 @@
         android:foregroundGravity="center"
 
         android:duplicateParentState="true"
-        android:src="@drawable/circle_background"/>
+        app:srcCompat="@drawable/save_to_googlepay_button_content"/>
 </RelativeLayout>

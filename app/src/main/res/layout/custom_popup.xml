@@ -9,7 +9,6 @@
     android:layout_gravity="center">
     <TextView
         android:id="@+id/textPopup"
-        android:background="@drawable/circle_background"
         android:gravity="center"
 
         android:textColor="@android:color/white"

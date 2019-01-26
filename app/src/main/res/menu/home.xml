@@ -20,6 +20,10 @@
         android:id="@+id/action_settings"
         android:orderInCategory="100"
         android:title="Online"
-        app:showAsAction="always" />
+        android:iconTint="@color/white"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_add_items"
+        android:title="@string/add_random_items" />
 
 </menu>

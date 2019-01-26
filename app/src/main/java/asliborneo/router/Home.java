@@ -178,14 +178,14 @@ public class Home extends AppCompatActivity
 
 
 
-        btnBack = findViewById(R.id.backBtn);
-        btnBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Home.super.finish();
-
-            }
-        });
+//        btnBack = findViewById(R.id.backBtn);
+//        btnBack.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Home.super.finish();
+//
+//            }
+//        });
 
         LocalBroadcastManager.getInstance(this)
                 .registerReceiver(mCancelBroadCast, new IntentFilter(Common.CANCEL_BROADCAST));
@@ -196,11 +196,13 @@ public class Home extends AppCompatActivity
         storageReference = storage.getReference();
 
 
+
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.pin);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "screen captured", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
         });

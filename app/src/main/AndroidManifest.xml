@@ -34,6 +34,10 @@
             </intent-filter>
         </activity>
 
+
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-1735533551147084~9666438974" />
         <uses-library
             android:name="org.apache.http.legacy"
             android:required="false" />
@@ -87,11 +91,11 @@
             android:label="@string/title_activity_rate__driver" />
         <activity
             android:name=".Home"
-
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".PayServices.CheckoutActivity" />
         <activity android:name=".JomRide.CallDriver" />
         <activity android:name=".MainMenu" />
+        <activity android:name=".RestaurantDetailActivity"></activity>
     </application>
 
 </manifest>
