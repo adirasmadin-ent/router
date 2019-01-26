@@ -19,6 +19,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -36,6 +37,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.support.annotation.NonNull;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RadioButton;
@@ -81,6 +83,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.google.firebase.storage.FirebaseStorage;
@@ -95,6 +100,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import asliborneo.router.Adapter.RestaurantAdapter;
 import asliborneo.router.Commons.Common;
 import asliborneo.router.Helper.Custom_Info_Window;
 import asliborneo.router.JomRide.BottomSheetRider;
@@ -104,13 +110,18 @@ import asliborneo.router.Model.Token;
 import asliborneo.router.PayServices.CheckoutActivity;
 
 import asliborneo.router.Service.IFCMService;
+import asliborneo.router.ViewModels.ViewModel;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 
 import dmax.dialog.SpotsDialog;
 
 public class Home extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener, ValueEventListener, GoogleMap.OnMapClickListener {
+        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener, ValueEventListener, GoogleMap.OnMapClickListener,
+        FilterDialogFragment.FilterListener,
+        RestaurantAdapter.OnRestaurantSelectedListener{
 
 
     private static final int MY_PERMISSION_REQUEST_CODE = 1;
@@ -163,6 +174,35 @@ public class Home extends AppCompatActivity
         }
     };
 
+
+    private static final String TAG = "MainActivity";
+
+    private static final int RC_SIGN_IN = 9001;
+
+//    private static final int LIMIT = 50;
+
+    @BindView(R.id.toolbar)
+    Toolbar mToolbar;
+
+    @BindView(R.id.text_current_search)
+    TextView mCurrentSearchView;
+
+    @BindView(R.id.text_current_sort_by)
+    TextView mCurrentSortByView;
+
+    @BindView(R.id.recycler_restaurants)
+    RecyclerView mRestaurantsRecycler;
+
+    @BindView(R.id.view_empty)
+    ViewGroup mEmptyView;;
+
+    private FirebaseFirestore mFirestore;
+    private Query mQuery;
+
+    private FilterDialogFragment mFilterDialog;
+    private RestaurantAdapter mAdapter;
+
+    private ViewModel mViewModel;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -174,7 +214,8 @@ public class Home extends AppCompatActivity
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        ButterKnife.bind(this);
+        setSupportActionBar(mToolbar);
 
 
 
@@ -1081,5 +1122,18 @@ public class Home extends AppCompatActivity
 
             }
         });
+    }
+
+    @Override
+    public void onRestaurantSelected(DocumentSnapshot restaurant) {
+        Intent intent = new Intent(this, RestaurantDetailActivity.class);
+        intent.putExtra(RestaurantDetailActivity.KEY_RESTAURANT_ID, restaurant.getId());
+
+        startActivity(intent);
+    }
+
+    @Override
+    public void onFilter(Filters filters) {
+
     }
 }

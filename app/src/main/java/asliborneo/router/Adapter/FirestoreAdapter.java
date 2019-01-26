@@ -21,15 +21,15 @@ public abstract class FirestoreAdapter<VH extends RecyclerView.ViewHolder>
 
     private ArrayList<DocumentSnapshot> mSnapshots = new ArrayList<>();
 
-    private FirestoreAdapter(Query query) {
+    public FirestoreAdapter(Query query) {
         mQuery = query;
     }
 
-    private void startListening() {
+    public void startListening() {
         // TODO(developer): Implement
     }
 
-    private void stopListening() {
+    public void stopListening() {
         if (mRegistration != null) {
             mRegistration.remove();
             mRegistration = null;
@@ -57,7 +57,7 @@ public abstract class FirestoreAdapter<VH extends RecyclerView.ViewHolder>
         return mSnapshots.size();
     }
 
-    private DocumentSnapshot getSnapshot(int index) {
+    public DocumentSnapshot getSnapshot(int index) {
         return mSnapshots.get(index);
     }
 
