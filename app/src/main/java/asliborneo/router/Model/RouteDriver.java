@@ -7,6 +7,91 @@ public class RouteDriver {
     private String rates;
     private String avatarUrl;
     private String carType;
+    private String platNumber;
+    private String routeMyId;
+    private String driverStatus;
+    private String makePayment;
+    private String email;
+    private String password;
+    private String wallet;
+    private String gender;
+    public String getDriverStatus() {
+        return driverStatus;
+    }
+
+    public void setDriverStatus(String driverStatus) {
+        this.driverStatus = driverStatus;
+    }
+
+    public String getRouteMyId() {
+        return routeMyId;
+    }
+
+    public void setRouteMyId(String routeMyId) {
+        this.routeMyId = routeMyId;
+    }
+
+    public String getPlatNumber() {
+        return platNumber;
+    }
+
+    public void setPlatNumber(String platNumber) {
+        this.platNumber = platNumber;
+    }
+
+    public String getMakePayment() {
+        return makePayment;
+    }
+
+    public void setMakePayment(String makePayment) {
+        this.makePayment = makePayment;
+    }
+
+
+
+    public RouteDriver(String gender) {
+        this.gender = gender;
+    }
+
+    public String getGender() {
+
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getWallet() {
+        return wallet;
+    }
+
+    public void setWallet(String wallet) {
+        this.wallet = wallet;
+    }
+
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public RouteDriver(String email, String password) {
+
+        this.email = email;
+        this.password = password;
+    }
 
     public String getName() {
         return name;
@@ -48,13 +133,15 @@ public class RouteDriver {
         this.carType = carType;
     }
 
-    public RouteDriver(String name, String phone, String rates, String avatarUrl, String carType) {
+    public RouteDriver(String name, String phone, String rates, String avatarUrl, String carType, String wallet) {
 
         this.name = name;
         this.phone = phone;
         this.rates = rates;
         this.avatarUrl = avatarUrl;
         this.carType = carType;
+        this.wallet =wallet;
+
     }
 
     public RouteDriver() {

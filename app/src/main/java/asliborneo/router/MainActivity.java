@@ -110,9 +110,7 @@ public class MainActivity extends AppCompatActivity {
         mAdView = findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
-        printKeyHash();
 
-        printKeyHash();
 
         Common.currentUser = new asliborneo.router.Model.Rider();
 
@@ -308,22 +306,22 @@ public class MainActivity extends AppCompatActivity {
                                                             Toast.makeText(MainActivity.this, "" + e.getMessage(), Toast.LENGTH_SHORT).show();
                                                         }
                                                     });
-//                                                } else {
-//                                                    users.child(userPhone)
-//                                                            .addListenerForSingleValueEvent(new ValueEventListener() {
-//                                                                @Override
-//                                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                                                                    Commons.current_routeDriver=dataSnapshot.getValue(asliborneo.route.Model.RouteDriver.class);
-//                                                                    Intent homeIntent = new Intent(MainActivity.this, Driver_Home.class);
-//                                                                    startActivity(homeIntent);
-//                                                                    finish();
-//                                                                }
-//
-//                                                                @Override
-//                                                                public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//                                                                }
-//                                                            });
+                                                } else {
+                                                    users.child(userPhone)
+                                                            .addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                @Override
+                                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                    Common.currentUser=dataSnapshot.getValue(asliborneo.router.Model.Rider.class);
+                                                                    Intent homeIntent = new Intent(MainActivity.this, Home.class);
+                                                                    startActivity(homeIntent);
+                                                                    finish();
+                                                                }
+
+                                                                @Override
+                                                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                }
+                                                            });
                                                 }
 
 

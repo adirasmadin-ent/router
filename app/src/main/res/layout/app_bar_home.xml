@@ -8,16 +8,16 @@
     tools:context=".Home">
 
     <!--<LinearLayout-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:orientation="horizontal"-->
-        <!--android:layout_alignParentTop="true"-->
-        <!--android:gravity="left">-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:orientation="horizontal"-->
+    <!--android:layout_alignParentTop="true"-->
+    <!--android:gravity="left">-->
 
-        <!--<ImageView-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:background="@drawable/ic_my_location_black_24dp"/>-->
+    <!--<ImageView-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:background="@drawable/ic_my_location_black_24dp"/>-->
     <!--</LinearLayout>-->
 
 
@@ -110,12 +110,12 @@
                         android:layout_rowWeight="2"
                         >
                         <!--<ImageView-->
-                            <!--android:id="@+id/backBtn"-->
-                            <!--android:layout_width="50dp"-->
-                            <!--android:layout_height="50dp"-->
-                            <!--android:layout_gravity="top"-->
+                        <!--android:id="@+id/backBtn"-->
+                        <!--android:layout_width="50dp"-->
+                        <!--android:layout_height="50dp"-->
+                        <!--android:layout_gravity="top"-->
 
-                            <!--android:background="@drawable/ic_arrow_drop_up_black_24dp" />-->
+                        <!--android:background="@drawable/ic_arrow_drop_up_black_24dp" />-->
                         <android.support.v7.widget.CardView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"

@@ -85,18 +85,20 @@ public class RestaurantDetailActivity extends AppCompatActivity
         setContentView(R.layout.activity_restaurant_detail);
         ButterKnife.bind(this);
 
-        // Get restaurant ID from extras
-        String restaurantId = getIntent().getExtras().getString(KEY_RESTAURANT_ID);
-        if (restaurantId == null) {
-            throw new IllegalArgumentException("Must pass extra " + KEY_RESTAURANT_ID);
+
+            String restaurantId = getIntent().getExtras().getString(KEY_RESTAURANT_ID);
+
+            if (restaurantId != null) {
+                throw new IllegalArgumentException("Must pass extra " + KEY_RESTAURANT_ID);
         }
 
         // Initialize Firestore
         mFirestore = FirebaseFirestore.getInstance();
 
         // Get reference to the restaurant
-        mRestaurantRef = mFirestore.collection("restaurants").document(restaurantId);
-
+        if(mRestaurantRef !=null) {
+            mRestaurantRef = mFirestore.collection("restaurants").document(restaurantId);
+        }
         // Get ratings
         Query ratingsQuery = mRestaurantRef
                 .collection("ratings")

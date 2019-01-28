@@ -32,7 +32,7 @@ import retrofit2.Response;
 public class Common {
 
 public static Rider currentUser;
-
+public static Location mLastLocation =null;
     public static double userWallet = 0.0;
     public static final String CANCEL_BROADCAST = "cancel_pickup";
     public static final String tokenTable ="Tokens";

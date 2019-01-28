@@ -64,6 +64,9 @@
     <string name="sort_by_rating">Sort by Rating</string>
     <string name="sort_by_popularity">Sort by Popularity</string>
     <string name="sort_by_price">Sort by Price</string>
+    <string name="you">You</string>
+    <string name="economy">Economy</string>
+    <string name="luxury">Luxury</string>
 
     //categories
     <string-array name="categories">
