@@ -96,7 +96,8 @@
         <activity android:name=".JomRide.CallDriver" />
         <activity android:name=".MainMenu" />
         <activity android:name=".RestaurantDetailActivity" />
-        <activity android:name=".JomRide.DriverStatus"></activity>
+        <activity android:name=".JomRide.DriverStatus" />
+        <activity android:name=".ListStore"></activity>
     </application>
 
 </manifest>

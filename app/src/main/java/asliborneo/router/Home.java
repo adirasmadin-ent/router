@@ -3,42 +3,42 @@ package asliborneo.router;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-
-import android.arch.lifecycle.ViewModelProviders;
+import android.arch.lifecycle.ViewModel;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+
 import android.graphics.drawable.Drawable;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.location.Location;
-import android.support.annotation.NonNull;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -55,7 +55,6 @@ import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -77,20 +76,16 @@ import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.iid.InstanceIdResult;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
@@ -102,45 +97,62 @@ import com.squareup.picasso.Picasso;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import asliborneo.router.Adapter.FirestoreAdapter;
-import asliborneo.router.Adapter.RestaurantAdapter;
+
 import asliborneo.router.Commons.Common;
 import asliborneo.router.Helper.Custom_Info_Window;
 import asliborneo.router.JomRide.BottomSheetRider;
 import asliborneo.router.JomRide.CallDriver;
 import asliborneo.router.JomRide.DriverStatus;
 import asliborneo.router.Model.Rider;
-import asliborneo.router.Model.RouteDriver;
 import asliborneo.router.Model.Token;
-import asliborneo.router.PayServices.CheckoutActivity;
-
-
 import asliborneo.router.Service.IFCMService;
 
-import asliborneo.router.ViewModels.ViewModel;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
-
-import android.support.v7.widget.LinearLayoutManager;
-import android.text.Html;
-
-import com.google.firebase.firestore.FirebaseFirestoreException;
-
-import butterknife.OnClick;
 import dmax.dialog.SpotsDialog;
 
-public class Home extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener, ValueEventListener, GoogleMap.OnMapClickListener
-        ,FilterDialogFragment.FilterListener,
-        RestaurantAdapter.OnRestaurantSelectedListener{
 
+public class Home extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener, ValueEventListener, GoogleMap.OnMapClickListener{
 
     private static final int MY_PERMISSION_REQUEST_CODE = 11;
 
     Toolbar toolbar;
     ActionBarDrawerToggle toggle;
     DrawerLayout drawer_layout;
+
+    private static final int RC_SIGN_IN = 123;
+
+
+    private static final String TAG = "MainActivity";
+
+    FirebaseFirestore mFirestore;
+//    private static final int LIMIT = 50;
+
+    @BindView(R.id.toolbar)
+    Toolbar mToolbar;
+
+    @BindView(R.id.text_current_search)
+    TextView mCurrentSearchView;
+
+    @BindView(R.id.text_current_sort_by)
+    TextView mCurrentSortByView;
+
+    @BindView(R.id.recycler_restaurants)
+    RecyclerView mRestaurantsRecycler;
+
+    @BindView(R.id.view_empty)
+    ViewGroup mEmptyView;;
+
+    private Query mQuery;
+
+    CardView filterBar;
+
+    private ViewModel mViewModel;
+
+
+
 
 
     LatLng pickup_location;
@@ -187,72 +199,47 @@ public class Home extends AppCompatActivity
     };
 
     LatLng latLng;
-    private static final String TAG = "Home";
 
-    private static final int RC_SIGN_IN = 9001;
-
-//    private static final int LIMIT = 50;
-
-    @BindView(R.id.toolbar)
-    Toolbar mToolbar;
-
-    @BindView(R.id.text_current_search)
-    TextView mCurrentSearchView;
-
-    @BindView(R.id.text_current_sort_by)
-    TextView mCurrentSortByView;
-
-    @BindView(R.id.recycler_restaurants)
-    RecyclerView mRestaurantsRecycler;
-
-    @BindView(R.id.view_empty)
-    ViewGroup mEmptyView;;
-
-    private FirebaseDatabase mFirestore;
-    private Query mQuery;
-
-    private FilterDialogFragment mFilterDialog;
-    private RestaurantAdapter mAdapter;
-
-    private ViewModel mViewModel;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        SupportMapFragment MapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mapView = MapFragment.getView();
-        MapFragment.getMapAsync(Home.this);
-
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        ButterKnife.bind(Home.this);
+        SupportMapFragment MapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        assert MapFragment != null;
+        MapFragment.getMapAsync(this);
+        drawer_layout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        toggle = new ActionBarDrawerToggle(
+                this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer_layout.addDrawerListener(toggle);
+        toggle.syncState();
+        nav_view=(NavigationView) findViewById(R.id.nav_view);
+        nav_view.setNavigationItemSelectedListener(this);
+        setSupportActionBar(toolbar);
+        ButterKnife.bind(this);
         setSupportActionBar(mToolbar);
-        mViewModel = ViewModelProviders.of(Home.this).get(ViewModel.class);
-        initFirestore();
-        initRecyclerView();
 
-        mFilterDialog = new FilterDialogFragment();
-//        btnBack = findViewById(R.id.backBtn);
-//        btnBack.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Home.super.finish();
-//
-//            }
-//        });
-
-        LocalBroadcastManager.getInstance(this)
-                .registerReceiver(mCancelBroadCast, new IntentFilter(Common.CANCEL_BROADCAST));
 
         Drawable drawable = ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_shopping_cart_black_24dp);
         toolbar.setOverflowIcon(drawable);
         storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference();
 
+        filterBar = findViewById(R.id.filter_bar);
+        filterBar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Home.this,ListStore.class);
+                startActivity(intent);
 
+            }
+        });
 
+        mFCMService = Common.getFCMService();
+        LocalBroadcastManager.getInstance(this)
+                .registerReceiver(mCancelBroadCast, new IntentFilter(Common.CANCEL_BROADCAST));
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.pin);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -303,7 +290,7 @@ public class Home extends AppCompatActivity
                         teksi_disabled.setBackgroundColor(getResources().getColor(R.color.buttonPickupRequest));
                     }
                     mMap.clear();
-                    loadAllAvailableDriver(new LatLng(Common.mLastLocation.getLatitude(), Common.mLastLocation.getLongitude()));
+                    loadAvailabledriver(new LatLng(Common.mLastLocation.getLatitude(), Common.mLastLocation.getLongitude()));
                 }
             });
 
@@ -319,7 +306,7 @@ public class Home extends AppCompatActivity
                         teksi_disabled.setBackgroundColor(getResources().getColor(R.color.buttonPickupRequest));
                     }
                     mMap.clear();
-                    loadAllAvailableDriver(new LatLng(Common.mLastLocation.getLatitude(), Common.mLastLocation.getLongitude()));
+                    loadAvailabledriver(new LatLng(Common.mLastLocation.getLatitude(), Common.mLastLocation.getLongitude()));
                 }
             });
 
@@ -369,7 +356,7 @@ public class Home extends AppCompatActivity
             public void onPlaceSelected(Place place) {
                 mMap.clear();
                 mPlaceLocation = place.getAddress().toString();
-                destination_location_marker = mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("Pin Location").icon(BitmapDescriptorFactory.fromResource(R.drawable.style_circular_button)));
+                destination_location_marker = mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("Pin Location"));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 15.0f));
 
             }
@@ -410,93 +397,10 @@ public class Home extends AppCompatActivity
 
         updateFirebaseToken();
         setupLocation();
-    }
 
-    private void initRecyclerView() {
-        if (mQuery == null) {
-            Log.w(TAG, "No query, not initializing RecyclerView");
-        }
-        mAdapter = new RestaurantAdapter(mQuery, this) {
-
-            @Override
-            protected void onDataChanged() {
-                // Show/hide content if the query returns empty.
-                if (getItemCount() == 0) {
-                    mRestaurantsRecycler.setVisibility(View.GONE);
-                    mEmptyView.setVisibility(View.VISIBLE);
-                } else {
-                    mRestaurantsRecycler.setVisibility(View.VISIBLE);
-                    mEmptyView.setVisibility(View.GONE);
-                }
-            }
-
-            @Override
-            protected void onError(FirebaseFirestoreException e) {
-                // Show a snackbar on errors
-                Snackbar.make(findViewById(android.R.id.content),
-                        "Error: check logs for info.", Snackbar.LENGTH_LONG).show();
-            }
-        };
-
-        mRestaurantsRecycler.setLayoutManager(new LinearLayoutManager(this));
-        mRestaurantsRecycler.setAdapter(mAdapter);
-    }
-
-    private void initFirestore() {
+        showDialogUpdateCartype();
 
     }
-    @Override
-    public void onStart() {
-        super.onStart();
-
-
-        // Apply filters
-        onFilter(mViewModel.getFilters());
-
-        // Start listening for Firestore updates
-        if (mAdapter != null) {
-            mAdapter.startListening();
-        }
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        if (mAdapter != null) {
-            mAdapter.stopListening();
-        }
-    }
-
-    private void onAddItemsClicked() {
-        // TODO(developer): Add random restaurants
-        showTodoToast();
-    }
-    private void showTodoToast() {
-        Toast.makeText(this, "TODO: Implement", Toast.LENGTH_SHORT).show();
-    }
-
-
-   private void updateFirebaseToken()
-   {
-       AccountKit.getCurrentAccount(new AccountKitCallback<Account>() {
-           @Override
-           public void onSuccess(Account account) {
-               FirebaseDatabase db = FirebaseDatabase.getInstance();
-               DatabaseReference tokens  = db.getReference(Common.tokenTable);
-                if (Common.currentUser !=null) {
-                    Token token = new Token(FirebaseInstanceId.getInstance().getToken());
-                    tokens.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(token);
-                }
-           }
-
-           @Override
-           public void onError(AccountKitError accountKitError) {
-
-           }
-       });
-   }
-
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (ActivityCompat.checkSelfPermission(Home.this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
@@ -558,46 +462,280 @@ public class Home extends AppCompatActivity
         };
     }
 
-    private void request_pickup_here(String uid) {
-        DatabaseReference pickupreference = FirebaseDatabase.getInstance().getReference("Pick Up Request");
-        GeoFire geoFire = new GeoFire(pickupreference);
-        geoFire.setLocation(uid, new GeoLocation(Common.mLastLocation.getLatitude(), Common.mLastLocation.getLongitude()), new GeoFire.CompletionListener() {
+
+
+
+    private void updateFirebaseToken()
+    {
+        AccountKit.getCurrentAccount(new AccountKitCallback<Account>() {
             @Override
-            public void onComplete(String key, DatabaseError error) {
+            public void onSuccess(Account account) {
+                FirebaseDatabase db = FirebaseDatabase.getInstance();
+                DatabaseReference tokens  = db.getReference(Common.tokenTable);
+                if (Common.currentUser !=null) {
+                    Token token = new Token(FirebaseInstanceId.getInstance().getToken());
+                    tokens.child(account.getId()).setValue(token);
+                }
+            }
+
+            @Override
+            public void onError(AccountKitError accountKitError) {
 
             }
         });
-        if (mcurrent != null)
-            mcurrent.remove();
-        mcurrent = mMap.addMarker(new MarkerOptions().title("Pick Up Here").snippet("").position(new LatLng(Common.mLastLocation.getLatitude(), Common.mLastLocation.getLongitude())).snippet("").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
-        mcurrent.showInfoWindow();
-        place_pickup_request.setText("Getting Driver");
+    }
 
-        find_driver();
+//    private void sendRequestToDriver(String driver_id) {
+//        DatabaseReference tokens=FirebaseDatabase.getInstance().getReference(Commons.tokenTable);
+//        tokens.orderByKey().equalTo(driver_id).addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//                for(DataSnapshot postsnapshot:dataSnapshot.getChildren()){
+//
+//                    Token token=postsnapshot.getValue(Token.class);
+//                    String json_lat_lng=new Gson().toJson(new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude()));
+//                    String rider_token= FirebaseInstanceId.getInstance().getToken();
+//                    Notification data=new Notification(rider_token,json_lat_lng);
+//                    Sender content=new Sender(data,token.getToken());
+//                    mFCMService.sendMessage(content)
+//                            .enqueue(new Callback<FCMResponse>() {
+//                                @Override
+//                                public void onResponse(Call<FCMResponse> call, Response<FCMResponse> response) {
+//                                    if(response.body().success==1){
+//                                        Toast.makeText(Home.this,"Request Sent",Toast.LENGTH_LONG).show();
+//                                    }else {
+//                                        Toast.makeText(Home.this,"Failed!",Toast.LENGTH_LONG).show();
+//                                    }
+//                                }
+//
+//                                @Override
+//                                public void onFailure(Call<FCMResponse> call, Throwable t) {
+//                                    Log.e("fcm_error",t.getMessage());;
+//                                }
+//                            });
+//                }
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//
+//            }
+//        });
+//    }
 
+    private void request_pickup_here(String uid) {
+        DatabaseReference pickupreference=FirebaseDatabase.getInstance().getReference("Pick Up Request");
+        GeoFire geoFire=new GeoFire(pickupreference);
+        geoFire.setLocation(uid, new GeoLocation(Common.mLastLocation.getLatitude(), Common.mLastLocation.getLongitude()), new GeoFire.CompletionListener() {
+            @Override
+            public void onComplete(String key, DatabaseError error) {
+                if(mcurrent !=null)
+                    mcurrent.remove();
+                mcurrent= mMap.addMarker(new MarkerOptions().title("Pick Up Here").position(new LatLng(Common.mLastLocation.getLatitude(), Common.mLastLocation.getLongitude())).snippet("").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+                mcurrent.showInfoWindow();
+                place_pickup_request.setText("Getting Driver");
+                find_driver();
+            }
+        });
+
+    }
+    //    private void showDialogUpdateCartype() {
+//        final AlertDialog.Builder updateInfo=new AlertDialog.Builder(Home.this);
+//        updateInfo.setTitle("");
+//        updateInfo.setMessage("PLEASE CHOOSE YOUR RIDE");
+//        View carType=LayoutInflater.from(Home.this).inflate(R.layout.layout_update_car_type,null);
+//
+//        final RadioButton defaultCar= carType.findViewById(R.id.economy);
+//        final RadioButton teksiDriver= carType.findViewById(R.id.luxury);
+//
+//
+//        if(Common.currentUser !=null)
+//            if (Common.currentUser.getCarType().equals("Economy"))
+//                defaultCar.setChecked(true);
+//
+//            else
+//            if (Common.currentUser.getCarType().equals("Luxury"))
+//                teksiDriver.setChecked(true);
+//
+//
+//
+//
+//        updateInfo.setView(carType);
+//        updateInfo.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialogInterface, int i) {
+//
+//
+//                AccountKit.getCurrentAccount(new AccountKitCallback<Account>() {
+//                    @Override
+//                    public void onSuccess(Account account) {
+//                        Map<String,Object> updateInfo=new HashMap<>();
+//                        if(teksiDriver.isChecked()) {
+//                            updateInfo.put("carType", teksiDriver.getText().toString());
+//                            Intent intent = new Intent(Home.this, CheckoutActivity.class);
+//                            startActivity(intent);
+//                            finish();
+//                        }
+//                        if (defaultCar.isChecked()) {
+//                            updateInfo.put("carType", defaultCar.getText().toString());
+//                            Intent intent = new Intent(Home.this, CheckoutActivity.class);
+//                            startActivity(intent);
+//                            finish();
+//                        } else
+//                            updateInfo.put("driverStatus", "NOT VERIFIED DRIVER");
+//
+//                        DatabaseReference driver_information_reference=FirebaseDatabase.getInstance().getReference(Common.Registered_driver);
+//                        driver_information_reference.child(account.getId()).updateChildren(updateInfo).addOnCompleteListener(new OnCompleteListener<Void>() {
+//                            @Override
+//                            public void onComplete(@NonNull Task<Void> task) {
+//                                if (task.isSuccessful()) {
+//
+//                                    showDriverStatus();
+//
+//                                }
+//
+//                            }
+//                        });
+//
+//                        driver_information_reference.child(account.getId())
+//                                .addListenerForSingleValueEvent(new ValueEventListener() {
+//                                    @Override
+//                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                                        Common.currentUser = dataSnapshot.getValue(Rider.class);
+//                                    }
+//
+//                                    @Override
+//                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//                                    }
+//                                });
+//                    }
+//
+//                    @Override
+//                    public void onError(AccountKitError accountKitError) {
+//
+//                    }
+//                });
+//
+//
+//
+//            }
+//
+//        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialogInterface, int i) {
+//                dialogInterface.dismiss();
+//            }
+//        }).show();
+//    }
+    private void showDialogUpdateCartype() {
+        final AlertDialog.Builder updateInfo=new AlertDialog.Builder(Home.this);
+        updateInfo.setTitle("");
+        updateInfo.setMessage("PLEASE CHOOSE YOUR RIDE");
+        View carType=LayoutInflater.from(Home.this).inflate(R.layout.layout_update_car_type,null);
+
+        final RadioButton defaultCar= carType.findViewById(R.id.economy);
+        final RadioButton teksiDriver= carType.findViewById(R.id.luxury);
+
+
+        if(Common.currentUser !=null)
+            if (Common.currentUser.getCarType().equals("Economy"))
+                defaultCar.setChecked(true);
+
+            else
+            if (Common.currentUser.getCarType().equals("Luxury"))
+                teksiDriver.setChecked(true);
+
+
+
+
+        updateInfo.setView(carType);
+        updateInfo.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+                final DatabaseReference[] driverLocation = new DatabaseReference[1];
+                AccountKit.getCurrentAccount(new AccountKitCallback<Account>() {
+                    @Override
+                    public void onSuccess(Account account) {
+                        Map<String,Object> updateInfo=new HashMap<>();
+                        if(teksiDriver.isChecked()) {
+
+                            FirebaseDatabase.getInstance().getReference(Common.driver_location).child("Economy");
+                            updateInfo.put("carType", teksiDriver.getText().toString());
+                            request_pickup_here(account.getId());
+
+                        }
+                        if (defaultCar.isChecked()) {
+                            FirebaseDatabase.getInstance().getReference(Common.driver_location).child("Luxury");
+                            updateInfo.put("carType", defaultCar.getText().toString());
+                            request_pickup_here(account.getId());
+
+                        } else
+                            updateInfo.put("driverStatus", "NOT VERIFIED DRIVER");
+
+                        DatabaseReference driver_information_reference=FirebaseDatabase.getInstance().getReference(Common.Registered_driver);
+                        driver_information_reference.child(account.getId()).updateChildren(updateInfo).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+
+//                                    showDriverStatus();
+
+                                }
+
+                            }
+                        });
+
+                        driver_information_reference.child(account.getId())
+                                .addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        Common.currentUser = dataSnapshot.getValue(Rider.class);
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                    }
+                                });
+                    }
+
+                    @Override
+                    public void onError(AccountKitError accountKitError) {
+
+                    }
+                });
+
+
+
+            }
+
+        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        }).show();
+    }
+
+    private void showDriverStatus() {
+        Intent intent = new Intent(Home.this,DriverStatus.class);
+        startActivity(intent);
     }
 
     private void find_driver() {
-
-        DatabaseReference driverLocation;
-
-        if(isUberX)
-            driverLocation=FirebaseDatabase.getInstance().getReference(Common.driver_location).child("Economy").child("routeMyId").child("driverStatus").child("platNumber");
-        else
-            driverLocation=FirebaseDatabase.getInstance().getReference(Common.driver_location).child("Luxury").child("routeMyId").child("driverStatus").child("platNumber");
-
-        GeoFire gf=new GeoFire(driverLocation);
-       final GeoQuery geoQuery = gf.queryAtLocation(new GeoLocation(Common.mLastLocation.getLatitude(),Common.mLastLocation.getLongitude()),radius);
-
+        DatabaseReference drivers_reference=FirebaseDatabase.getInstance().getReference("Drivers");
+        GeoFire gfdrivers=new GeoFire(drivers_reference);
+        final GeoQuery geoQuery=gfdrivers.queryAtLocation(new GeoLocation(Common.mLastLocation.getLatitude(), Common.mLastLocation.getLongitude()),radius);
         geoQuery.removeAllListeners();
         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
             public void onKeyEntered(String key, GeoLocation location) {
-                if (!Common.isDriverFound) {
-                    Common.isDriverFound = true;
-                    Common.driverId = key;
+                if(!Common.isDriverFound){
+                    Common.isDriverFound=true;
+                    Common.driverId=key;
                     place_pickup_request.setText("Call Driver");
-
                 }
             }
 
@@ -613,14 +751,13 @@ public class Home extends AppCompatActivity
 
             @Override
             public void onGeoQueryReady() {
-                if (!Common.isDriverFound && radius < LIMIT) {
+                if(!Common.isDriverFound&&radius<LIMIT){
                     radius++;
                     find_driver();
-                } else {
-                    if (!Common.isDriverFound) {
+                }else{
+                    if(!Common.isDriverFound) {
                         Toast.makeText(Home.this, "No Drivers available around", Toast.LENGTH_LONG).show();
                         place_pickup_request.setText("Request Pickup");
-
                         geoQuery.removeAllListeners();
                     }
                 }
@@ -634,7 +771,6 @@ public class Home extends AppCompatActivity
         });
 
     }
-
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -710,13 +846,14 @@ public class Home extends AppCompatActivity
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             // Permission to access the location is missing.
-            PermissionUtils.requestPermission(Home.this, MY_PERMISSION_REQUEST_CODE,
+            PermissionUtils.requestPermission(this, MY_PERMISSION_REQUEST_CODE,
                     Manifest.permission.ACCESS_FINE_LOCATION, true);
         } else if (mMap != null) {
             // Access to the location has been granted to the app.
             mMap.setMyLocationEnabled(true);
         }
     }
+
 
 
     private void displayLocation() {
@@ -746,7 +883,7 @@ public class Home extends AppCompatActivity
                     Driver_available_ref.addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
-                            loadAllAvailableDriver(new LatLng(Common.mLastLocation.getLatitude(), Common.mLastLocation.getLongitude()));
+                            loadAvailabledriver(new LatLng(Common.mLastLocation.getLatitude(), Common.mLastLocation.getLongitude()));
                         }
 
                         @Override
@@ -756,156 +893,63 @@ public class Home extends AppCompatActivity
                     });
 
 
-                    loadAllAvailableDriver(new LatLng(Common.mLastLocation.getLatitude(), Common.mLastLocation.getLongitude()));
+                    loadAvailabledriver(new LatLng(Common.mLastLocation.getLatitude(), Common.mLastLocation.getLongitude()));
                 }
             }
         });
-
-    }
-    private void showDialogUpdateCartype() {
-        final AlertDialog.Builder updateInfo=new AlertDialog.Builder(Home.this);
-        updateInfo.setTitle("");
-        updateInfo.setMessage("DRIVER STATUS");
-        View carType=LayoutInflater.from(Home.this).inflate(R.layout.layout_update_car_type,null);
-
-        final RadioButton defaultCar= carType.findViewById(R.id.economy);
-        final RadioButton teksiDriver= carType.findViewById(R.id.luxury);
-
-
-        if(Common.currentUser !=null)
-            if (Common.currentUser.getCarType().equals("Economy"))
-                defaultCar.setChecked(true);
-
-            else
-            if (Common.currentUser.getCarType().equals("Luxury"))
-                teksiDriver.setChecked(true);
-
-
-
-
-        updateInfo.setView(carType);
-        updateInfo.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-
-
-                AccountKit.getCurrentAccount(new AccountKitCallback<Account>() {
-                    @Override
-                    public void onSuccess(Account account) {
-                        Map<String,Object> updateInfo=new HashMap<>();
-                        if(teksiDriver.isChecked()) {
-                            updateInfo.put("carType", teksiDriver.getText().toString());
-                            Intent intent = new Intent(Home.this, CheckoutActivity.class);
-                            startActivity(intent);
-                            finish();
-                        }
-                        if (defaultCar.isChecked()) {
-                            updateInfo.put("carType", defaultCar.getText().toString());
-                            Intent intent = new Intent(Home.this, CheckoutActivity.class);
-                            startActivity(intent);
-                            finish();
-                        } else
-                            updateInfo.put("driverStatus", "NOT VERIFIED DRIVER");
-
-                        DatabaseReference driver_information_reference=FirebaseDatabase.getInstance().getReference(Common.Registered_driver);
-                        driver_information_reference.child(account.getId()).updateChildren(updateInfo).addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                if (task.isSuccessful()) {
-
-                                  showDriverStatus();
-
-                                }
-
-                            }
-                        });
-
-                        driver_information_reference.child(account.getId())
-                                .addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                        Common.currentUser = dataSnapshot.getValue(Rider.class);
-                                    }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                    }
-                                });
-                    }
-
-                    @Override
-                    public void onError(AccountKitError accountKitError) {
-
-                    }
-                });
-
-
-
-            }
-
-        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.dismiss();
-            }
-        }).show();
     }
 
-    private void showDriverStatus() {
-        Intent intent = new Intent(Home.this,DriverStatus.class);
-        startActivity(intent);
-    }
-
-    private void loadAllAvailableDriver(final LatLng location) {
+    private void loadAvailabledriver(final LatLng location) {
         mMap.clear();
 
+
+        // mcurrent = mMap.addMarker(new MarkerOptions().position(location).title("You").icon(BitmapDescriptorFactory.fromResource(R.drawable.marker)));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.latitude, location.longitude), 15.0f));
+        DatabaseReference driverlocation=FirebaseDatabase.getInstance().getReference("Drivers");
+        GeoFire gf=new GeoFire(driverlocation);
         mcurrent = mMap.addMarker(new MarkerOptions().position(location)
                 .title(getResources().getString(R.string.you))
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker)));
+        );
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 15.0f));
 
 
-        DatabaseReference driverLocation;
 
-        if(isUberX)
-            driverLocation=FirebaseDatabase.getInstance().getReference(Common.driver_location).child("Economy").child("routeMyId").child("driverStatus").child("platNumber");
+
+        if (isUberX)
+
+            driverlocation = FirebaseDatabase.getInstance().getReference(Common.driver_location).child("routeMyId").child("driverStatus").child("platNumber");
         else
-            driverLocation=FirebaseDatabase.getInstance().getReference(Common.driver_location).child("Luxury").child("routeMyId").child("driverStatus").child("platNumber");
+            driverlocation = FirebaseDatabase.getInstance().getReference(Common.driver_location).child("routeMyId").child("driverStatus").child("platNumber");
 
-        GeoFire geoFire=new GeoFire(driverLocation);
 
-        GeoQuery geoQuery=geoFire.queryAtLocation(new GeoLocation(location.latitude, location.longitude), distance);
+        GeoQuery geoQuery=gf.queryAtLocation(new GeoLocation(location.latitude,location.longitude),distance);
         geoQuery.removeAllListeners();
+
         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
             public void onKeyEntered(String key, final GeoLocation location) {
-                FirebaseDatabase.getInstance().getReference(Common.Registered_driver).child(key).addListenerForSingleValueEvent(new ValueEventListener() {
+                FirebaseDatabase.getInstance().getReference("DriverInformation").child(key).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                        RouteDriver driver=dataSnapshot.getValue(RouteDriver.class);
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        Rider user=dataSnapshot.getValue(Rider.class);
                         String name;
                         String platNumber;
                         String phone;
                         String status;
 
-                        if(driver.getName()!=null) name=driver.getName();
+                        if(user.getName()!=null) name=user.getName();
                         else name="NOT VERIFIED DRIVER";
 
-                        if (driver.getPhone()!=null)phone="Phone: "+driver.getPhone();
+                        if (user.getPhone()!=null)phone="Phone: "+user.getPhone();
                         else phone="Phone: Unknown";
-                        if (driver.getPlatNumber()!=null)platNumber="platNumber: "+driver.getPlatNumber();
+                        if (user.getPlatNumber()!=null)platNumber="platNumber: "+user.getPlatNumber();
                         else platNumber="platNumber: Unknown";
 
-
-                        mMap.addMarker(new MarkerOptions().position(new LatLng(location.latitude, location.longitude)).flat(true)
-                                .title(name).snippet("Driver ID: "+dataSnapshot.getKey()).icon(BitmapDescriptorFactory.fromResource(R.drawable.car)));
-
+                        mMap.addMarker(new MarkerOptions().position(new LatLng(location.latitude,location.longitude)).title(user.getName()).snippet("Phone "+dataSnapshot.getKey()).icon(BitmapDescriptorFactory.fromResource(R.drawable.car)));
                     }
 
                     @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                    public void onCancelled(DatabaseError databaseError) {
 
                     }
                 });
@@ -925,7 +969,7 @@ public class Home extends AppCompatActivity
             public void onGeoQueryReady() {
                 if (distance<=LIMIT){
                     distance++;
-                    loadAllAvailableDriver(location);
+                    loadAvailabledriver(location);
                 }
             }
 
@@ -935,6 +979,41 @@ public class Home extends AppCompatActivity
             }
         });
     }
+
+
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_menu) {
+            // Handle the camera action
+        } else if (id == R.id.nav_cart) {
+
+        } else if (id ==R.id.nav_orders) {
+
+        } else if (id == R.id.nav_backjomeat) {
+            finish();
+        }
+        if (item.getItemId() == R.id.nav_signout) {
+            Sign_Out();
+
+        } else if (id == R.id.nav_updateInformation) {
+            showUpdateInformationDialog();
+        }
+//        if (id == R.id.nav_update_cartype) {
+//
+//
+//        }
+
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
     private void showUpdateInformationDialog() {
         final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this);
         alertDialog.setTitle("Update Information");
@@ -1008,102 +1087,6 @@ public class Home extends AppCompatActivity
 
         alertDialog.show();
     }
-
-
-
-
-
-
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.home, menu);
-        return true;
-    }
-
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        int id = item.getItemId();
-        if (id == R.id.nav_orders) {
-            return true;
-        }
-        if (id == R.id.nav_cart) {
-            return true;
-        }
-        if (id == R.id.nav_menu) {
-            goToRestaurantActivity();
-            return true;
-        }
-        if (id == R.id.menu_add_items) {
-           onAddItemsClicked();
-            return true;
-        }
-        else if (id ==R.id.action_settings) {
-            menu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_offline));
-            menu.getItem(0).setTitle("Offline");
-            menu.getItem(1).setIcon(getResources().getDrawable(R.drawable.ic_online));
-            menu.getItem(1).setTitle("Online");
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-
-
-
-    }
-//
-    private void goToRestaurantActivity()
-    {
-        Intent intent = new Intent(Home.this,RestaurantDetailActivity.class);
-        startActivity(intent);
-        finish();
-
-    }
-
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.nav_menu) {
-            // Handle the camera action
-        } else if (id == R.id.nav_cart) {
-
-        } else if (id ==R.id.nav_orders) {
-
-        } else if (id == R.id.nav_backjomeat) {
-            finish();
-        }
-        if (item.getItemId() == R.id.nav_signout) {
-            Sign_Out();
-
-        } else if (id == R.id.nav_updateInformation) {
-            showUpdateInformationDialog();
-        }
-        if (id == R.id.nav_update_cartype) {
-
-            showDialogUpdateCartype();
-        }
-
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
-    }
-
-
 
     private void chooseImageAndUpload() {
         Intent intent = new Intent();
@@ -1217,7 +1200,7 @@ public class Home extends AppCompatActivity
 
     @Override
     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-        loadAllAvailableDriver(new LatLng(Common.mLastLocation.getLatitude(), Common.mLastLocation.getLongitude()));
+        loadAvailabledriver(new LatLng(Common.mLastLocation.getLatitude(), Common.mLastLocation.getLongitude()));
     }
 
     @Override
@@ -1241,33 +1224,7 @@ public class Home extends AppCompatActivity
             }
         });
     }
-    @OnClick(R.id.filter_bar)
-    public void onFilterClicked() {
-        // Show the dialog containing filter options
-        mFilterDialog.show(getSupportFragmentManager(), FilterDialogFragment.TAG);
-    }
 
-    @OnClick(R.id.button_clear_filter)
-    public void onClearFilterClicked() {
-        mFilterDialog.resetFilters();
 
-        onFilter(Filters.getDefault());
-    }
 
-    @Override
-    public void onRestaurantSelected(DocumentSnapshot restaurant) {
-        Intent intent = new Intent(this, RestaurantDetailActivity.class);
-        intent.putExtra(RestaurantDetailActivity.KEY_RESTAURANT_ID, restaurant.getId());
-
-        startActivity(intent);
-    }
-
-    @Override
-    public void onFilter(Filters filters) {
-        mCurrentSearchView.setText(Html.fromHtml(filters.getSearchDescription(this)));
-        mCurrentSortByView.setText(filters.getOrderDescription(this));
-
-        // Save filters
-        mViewModel.setFilters(filters);
-    }
 }

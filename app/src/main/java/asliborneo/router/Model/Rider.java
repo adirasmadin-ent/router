@@ -8,6 +8,15 @@ public class Rider {
     private String avatarUrl;
     private String carType;
     private String wallet;
+    private String platNumber;
+
+    public String getPlatNumber() {
+        return platNumber;
+    }
+
+    public void setPlatNumber(String platNumber) {
+        this.platNumber = platNumber;
+    }
 
     public String getWallet() {
         return wallet;

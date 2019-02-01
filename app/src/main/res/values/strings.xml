@@ -22,8 +22,8 @@
     <string name="final_calculate">%s + %s = RM%.2f</string>
     <string name="default_notification_channel_id">Notifications</string>
     <string name="default_notification_channel_name">Route Notification</string>
-    <string name="FACEBOOK_APP_ID">1232083650264469</string>
-    <string name="ACCOUNT_KIT_CLIENT_TOKEN">ca82e10846c4721f4c4bbac3e75e6a48</string>
+    <string name="FACEBOOK_APP_ID">399657284143336</string>
+    <string name="ACCOUNT_KIT_CLIENT_TOKEN">f8bbfb46e950f6b1ca7b5f54bf3fecb7</string>
     <string name="driver_name">Driver Name :</string>
     <string name="phone">Phone :</string>
     <string name="rate">Rate :</string>
@@ -31,6 +31,7 @@
     <string name="btn_call_driver">CALL DRIVER</string>
     <string name="btn_cancel">Cancel</string>
     <string name="banner_ad_unit_id">ca-app-pub-1735533551147084/8624039796</string>
+
     //pay services
     <string name="googlepay_button_content_description" translatable="false">Jom Ride</string>
     <string name="buy_with_googlepay_button_content_description" translatable="false">Buy with Jom Ride</string>
@@ -65,8 +66,8 @@
     <string name="sort_by_popularity">Sort by Popularity</string>
     <string name="sort_by_price">Sort by Price</string>
     <string name="you">You</string>
-    <string name="economy">Economy</string>
-    <string name="luxury">Luxury</string>
+    <string name="economy">Economy ( Normal price )</string>
+    <string name="luxury">Luxury ( 20% extra )</string>
 
     //categories
     <string-array name="categories">
